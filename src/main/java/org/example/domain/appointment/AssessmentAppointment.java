@@ -6,12 +6,6 @@ import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.enums.AppointmentType;
 import org.example.domain.valueobject.TimeSlot;
 
-/**
- * Represents an assessment or evaluation appointment.
- *
- * @author
- * @version 1.0
- */
 public class AssessmentAppointment extends Appointment {
 
     public AssessmentAppointment(int id, User user, TimeSlot timeSlot, AppointmentStatus status, int participants) {

@@ -36,9 +36,9 @@ class AppointmentServiceTest {
 
     /**
      * TODO:
-     *  - Create all mocks with Mockito.mock(...)
-     *  - Create appointmentService = new AppointmentService(
-     *        mockRepo, mockScheduleService, mockReminderService, List.of(mockRule))
+     * - Create all mocks with Mockito.mock(...)
+     * - Create appointmentService = new AppointmentService(
+     * mockRepo, mockScheduleService, mockReminderService, List.of(mockRule))
      */
     @BeforeEach
     void setUp() {
@@ -49,11 +49,11 @@ class AppointmentServiceTest {
      * US2.1 — Booking should call repository.save() and scheduleService.bookSlot().
      *
      * TODO:
-     *  1. Create a valid appointment (e.g. UrgentAppointment with a future TimeSlot)
-     *  2. Stub mockRule.isValid(appointment) → true
-     *  3. Call appointmentService.bookAppointment(appointment)
-     *  4. verify(mockRepo, times(1)).save(appointment)
-     *  5. verify(mockScheduleService, times(1)).bookSlot(anyInt())
+     * 1. Create a valid appointment (e.g. UrgentAppointment with a future TimeSlot)
+     * 2. Stub mockRule.isValid(appointment) → true
+     * 3. Call appointmentService.bookAppointment(appointment)
+     * 4. verify(mockRepo, times(1)).save(appointment)
+     * 5. verify(mockScheduleService, times(1)).bookSlot(anyInt())
      */
     @Test
     void testBookAppointment_validAppointment_savesCalled() {
@@ -64,10 +64,11 @@ class AppointmentServiceTest {
      * US2.2/US2.3 — Booking should throw if any rule returns false.
      *
      * TODO:
-     *  1. Stub mockRule.isValid(any()) → false
-     *  2. Stub mockRule.getErrorMessage() → "Rule violated"
-     *  3. assertThrows(IllegalArgumentException.class, () -> appointmentService.bookAppointment(appointment))
-     *  4. verify(mockRepo, never()).save(any())   ← save must NOT be called
+     * 1. Stub mockRule.isValid(any()) → false
+     * 2. Stub mockRule.getErrorMessage() → "Rule violated"
+     * 3. assertThrows(IllegalArgumentException.class, () ->
+     * appointmentService.bookAppointment(appointment))
+     * 4. verify(mockRepo, never()).save(any()) ← save must NOT be called
      */
     @Test
     void testBookAppointment_ruleViolated_throwsAndDoesNotSave() {
@@ -78,11 +79,11 @@ class AppointmentServiceTest {
      * US4.1 — Cancelling a future appointment should update status to CANCELLED.
      *
      * TODO:
-     *  1. Create a mock appointment in the future
-     *  2. Stub mockRepo.findById(1) → appointment
-     *  3. Call appointmentService.cancelAppointment(1, user)
-     *  4. verify(mockRepo).update(appointment)
-     *  5. assertEquals(AppointmentStatus.CANCELLED, appointment.getStatus())
+     * 1. Create a mock appointment in the future
+     * 2. Stub mockRepo.findById(1) → appointment
+     * 3. Call appointmentService.cancelAppointment(1, user)
+     * 4. verify(mockRepo).update(appointment)
+     * 5. assertEquals(AppointmentStatus.CANCELLED, appointment.getStatus())
      */
     @Test
     void testCancelAppointment_futureAppointment_statusCancelled() {
@@ -90,12 +91,14 @@ class AppointmentServiceTest {
     }
 
     /**
-     * US4.2 — Non-admin user cancelling another user's appointment should throw SecurityException.
+     * US4.2 — Non-admin user cancelling another user's appointment should throw
+     * SecurityException.
      *
      * TODO:
-     *  1. Create appointment belonging to user A
-     *  2. Create user B (non-admin)
-     *  3. Call cancelAppointment(id, userB) inside assertThrows(SecurityException.class, ...)
+     * 1. Create appointment belonging to user A
+     * 2. Create user B (non-admin)
+     * 3. Call cancelAppointment(id, userB) inside
+     * assertThrows(SecurityException.class, ...)
      */
     @Test
     void testCancelAppointment_nonAdminOtherUser_throwsSecurityException() {

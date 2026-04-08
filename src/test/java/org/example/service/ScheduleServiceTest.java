@@ -11,65 +11,61 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for {@link ScheduleService}.
- *
- * @author
- * @version 1.0
- */
 class ScheduleServiceTest {
 
-    // TODO: Add field: Schedule schedule
-    // TODO: Add field: ScheduleService scheduleService
+    private Schedule schedule;
 
-    /**
-     * TODO:
-     * - schedule = new Schedule()
-     * - scheduleService = new ScheduleService(schedule)
-     * - Add a few TimeSlot objects to the schedule for testing
-     */
     @BeforeEach
     void setUp() {
-        // TODO: initialize schedule and scheduleService with test data
+        schedule = new Schedule();
+
+        TimeSlot availableSlot1 = new TimeSlot(1, LocalDate.now(), LocalTime.of(9, 0), LocalTime.of(10, 0), true);
+        TimeSlot availableSlot2 = new TimeSlot(2, LocalDate.now(), LocalTime.of(10, 0), LocalTime.of(11, 0), true);
+        TimeSlot bookedSlot = new TimeSlot(3, LocalDate.now(), LocalTime.of(11, 0), LocalTime.of(12, 0), false);
+
+        schedule.addSlot(availableSlot1);
+        schedule.addSlot(availableSlot2);
+        schedule.addSlot(bookedSlot);
     }
 
-    /**
-     * US1.3 — Should return only available slots.
-     *
-     * TODO:
-     * 1. Add 2 available slots and 1 unavailable slot to the schedule
-     * 2. Call scheduleService.getAvailableSlots()
-     * 3. assertEquals(2, result.size())
-     * 4. assertTrue(result.stream().allMatch(TimeSlot::isAvailable))
-     */
     @Test
     void testGetAvailableSlots_returnsOnlyAvailable() {
-        // TODO: implement test
+        List<TimeSlot> availableSlots = schedule.getAvailableSlots();
+
+        assertEquals(2, availableSlots.size());
+
+        for (TimeSlot slot : availableSlots) {
+            assertTrue(slot.isAvailable());
+        }
     }
 
-    /**
-     * US2.1 — Booking a slot should mark it as unavailable.
-     *
-     * TODO:
-     * 1. Create a slot with id=1, isAvailable=true
-     * 2. Call scheduleService.bookSlot(1)
-     * 3. assertFalse(slot.isAvailable())
-     */
     @Test
     void testBookSlot_marksSlotUnavailable() {
-        // TODO: implement test
+        schedule.markSlotAsBooked(1);
+
+        TimeSlot slot = schedule.getTimeSlots().stream()
+                .filter(s -> s.getId() == 1)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(slot);
+        assertFalse(slot.isAvailable());
     }
 
-    /**
-     * US4.1 — Freeing a slot after cancellation should make it available again.
-     *
-     * TODO:
-     * 1. Create a slot with id=1, book it first
-     * 2. Call scheduleService.freeSlot(1)
-     * 3. assertTrue(slot.isAvailable())
-     */
     @Test
     void testFreeSlot_marksSlotAvailable() {
-        // TODO: implement test
+        schedule.markSlotAsBooked(1);
+        assertFalse(schedule.getTimeSlots().stream()
+                .filter(s -> s.getId() == 1).findFirst().get().isAvailable());
+
+        schedule.freeSlot(1);
+
+        TimeSlot slot = schedule.getTimeSlots().stream()
+                .filter(s -> s.getId() == 1)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(slot);
+        assertTrue(slot.isAvailable());
     }
 }

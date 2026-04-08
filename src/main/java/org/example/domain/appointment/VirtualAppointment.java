@@ -6,12 +6,6 @@ import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.enums.AppointmentType;
 import org.example.domain.valueobject.TimeSlot;
 
-/**
- * Represents a virtual/remote appointment (online meeting).
- *
- * @author
- * @version 1.0
- */
 public class VirtualAppointment extends Appointment {
 
     public VirtualAppointment(int id, User user, TimeSlot timeSlot, AppointmentStatus status, int participants) {

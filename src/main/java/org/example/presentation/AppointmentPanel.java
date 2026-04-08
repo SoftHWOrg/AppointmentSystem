@@ -1,89 +1,196 @@
 package org.example.presentation;
 
+import org.example.domain.appointment.*;
+import org.example.domain.entity.Appointment;
+import org.example.domain.entity.User;
+import org.example.domain.enums.AppointmentStatus;
+import org.example.domain.enums.AppointmentType;
+import org.example.domain.valueobject.TimeSlot;
 import org.example.service.AppointmentService;
 import org.example.service.AuthService;
 import org.example.service.ScheduleService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Panel for viewing available time slots and booking a new appointment (US1.3, US2.1).
- *
- * Layout:
- *  - Top: "Book an Appointment" title + "Back" button
- *  - Left: list of available time slots (JList or JTable)
- *  - Right: booking form:
- *      - Appointment Type dropdown (JComboBox with all 7 types)
- *      - Participants spinner (JSpinner)
- *      - "Book" button
- *  - Bottom: status/error label
- *
- * @author
- * @version 1.0
- */
 public class AppointmentPanel extends JPanel {
 
-    // TODO: Add field: MainFrame mainFrame
-    // TODO: Add field: AuthService authService
-    // TODO: Add field: AppointmentService appointmentService
-    // TODO: Add field: ScheduleService scheduleService
-    // TODO: Add field: JList<String> slotList       (shows available time slots)
-    // TODO: Add field: JComboBox<String> typeCombo  (appointment type selector)
-    // TODO: Add field: JSpinner participantsSpinner
-    // TODO: Add field: JLabel statusLabel
+    private final MainFrame mainFrame;
+    private final AuthService authService;
+    private final AppointmentService appointmentService;
+    private final ScheduleService scheduleService;
 
-    /**
-     * Constructor — builds the appointment booking UI.
-     *
-     * TODO:
-     *  1. Assign all fields
-     *  2. Build the layout with a slot list on the left and booking form on the right
-     *  3. Populate slotList with available slots from scheduleService.getAvailableSlots()
-     *  4. Populate typeCombo with all AppointmentType values
-     *  5. Add "Book" button listener → call handleBooking()
-     *  6. Add "Back" button listener → mainFrame.showPanel(MainFrame.DASHBOARD_PANEL)
-     *
-     * @param mainFrame          the parent window
-     * @param authService        to get the currently logged-in user
-     * @param appointmentService to perform the booking
-     * @param scheduleService    to get available time slots
-     */
+    private DefaultListModel<String> slotModel;
+    private JList<String> slotList;
+    private List<TimeSlot> availableSlots;
+    private JComboBox<AppointmentType> typeCombo;
+    private JSpinner participantsSpinner;
+    private JLabel statusLabel;
+
     public AppointmentPanel(MainFrame mainFrame,
                             AuthService authService,
                             AppointmentService appointmentService,
                             ScheduleService scheduleService) {
-        // TODO: build the booking UI
+        this.mainFrame = mainFrame;
+        this.authService = authService;
+        this.appointmentService = appointmentService;
+        this.scheduleService = scheduleService;
+        this.availableSlots = new ArrayList<>();
+        buildUI();
     }
 
-    /**
-     * Loads available time slots into the slotList.
-     * Call this when the panel is first shown or after a booking.
-     *
-     * TODO:
-     *  1. Call scheduleService.getAvailableSlots()
-     *  2. Convert each TimeSlot to a display string (date + time range)
-     *  3. Set them into slotList using a DefaultListModel
-     */
+    private void buildUI() {
+        setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(240, 244, 248));
+        setBorder(new EmptyBorder(15, 15, 15, 15));
+
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setBackground(new Color(240, 244, 248));
+
+        JLabel title = new JLabel("Book an Appointment");
+        title.setFont(new Font("SansSerif", Font.BOLD, 18));
+        title.setForeground(new Color(25, 80, 170));
+        topBar.add(title, BorderLayout.WEST);
+
+        JButton backButton = new JButton("← Back");
+        styleButton(backButton, new Color(100, 100, 100));
+        backButton.addActionListener(e -> mainFrame.showPanel(MainFrame.DASHBOARD_PANEL));
+        topBar.add(backButton, BorderLayout.EAST);
+        add(topBar, BorderLayout.NORTH);
+
+        slotModel = new DefaultListModel<>();
+        slotList = new JList<>(slotModel);
+        slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        slotList.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        JScrollPane slotScroll = new JScrollPane(slotList);
+        slotScroll.setPreferredSize(new Dimension(320, 0));
+        slotScroll.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(180, 200, 230)),
+                "Available Slots",
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font("SansSerif", Font.BOLD, 12),
+                new Color(25, 80, 170)));
+        add(slotScroll, BorderLayout.WEST);
+
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(new Color(180, 200, 230)),
+                        "Booking Details",
+                        TitledBorder.LEFT, TitledBorder.TOP,
+                        new Font("SansSerif", Font.BOLD, 12),
+                        new Color(25, 80, 170)),
+                new EmptyBorder(10, 15, 10, 15)));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Appointment Type:"), gbc);
+        typeCombo = new JComboBox<>(AppointmentType.values());
+        typeCombo.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        gbc.gridx = 1;
+        formPanel.add(typeCombo, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        formPanel.add(new JLabel("Participants:"), gbc);
+        participantsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
+        participantsSpinner.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        gbc.gridx = 1;
+        formPanel.add(participantsSpinner, gbc);
+
+        JButton bookButton = new JButton("Book Appointment");
+        styleButton(bookButton, new Color(25, 140, 60));
+        bookButton.addActionListener(e -> handleBooking());
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(bookButton, gbc);
+
+        add(formPanel, BorderLayout.CENTER);
+
+        statusLabel = new JLabel(" ", SwingConstants.CENTER);
+        statusLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        statusLabel.setBorder(new EmptyBorder(5, 0, 5, 0));
+        add(statusLabel, BorderLayout.SOUTH);
+    }
+
+    
     public void loadAvailableSlots() {
-        // TODO: implement slot loading
+        slotModel.clear();
+        availableSlots = scheduleService.getAvailableSlots();
+        if (availableSlots == null || availableSlots.isEmpty()) {
+            slotModel.addElement("  No available slots.");
+        } else {
+            for (TimeSlot slot : availableSlots) {
+                slotModel.addElement(String.format("  [%d]  %s  %s – %s",
+                        slot.getId(),
+                        slot.getDate(),
+                        slot.getStartTime(),
+                        slot.getEndTime()));
+            }
+        }
+        statusLabel.setText(" ");
     }
 
-    /**
-     * Handles the "Book" button click.
-     *
-     * TODO:
-     *  1. Check a slot is selected in slotList — if not, show error
-     *  2. Get selected AppointmentType from typeCombo
-     *  3. Get participants count from participantsSpinner
-     *  4. Get current user from authService.getCurrentUser()
-     *  5. Create the correct Appointment subclass based on type
-     *     (e.g. if type == URGENT → new UrgentAppointment(...))
-     *  6. Call appointmentService.bookAppointment(appointment)
-     *  7. If successful → show success message, refresh slot list
-     *  8. If exception → show error in statusLabel
-     */
     private void handleBooking() {
-        // TODO: implement booking handler
+        int selectedIndex = slotList.getSelectedIndex();
+        if (selectedIndex < 0 || availableSlots == null || availableSlots.isEmpty()) {
+            setStatus("Please select a time slot.", false);
+            return;
+        }
+
+        TimeSlot selectedSlot = availableSlots.get(selectedIndex);
+        AppointmentType selectedType = (AppointmentType) typeCombo.getSelectedItem();
+        int participants = (int) participantsSpinner.getValue();
+        User currentUser = authService.getCurrentUser();
+
+        Appointment appointment = createAppointment(0, currentUser, selectedSlot,
+                selectedType, AppointmentStatus.PENDING, participants);
+
+        try {
+            appointmentService.bookAppointment(appointment);
+            setStatus("Appointment booked successfully!", true);
+            loadAvailableSlots();
+        } catch (IllegalArgumentException ex) {
+            setStatus(ex.getMessage(), false);
+        }
+    }
+
+    private Appointment createAppointment(int id, User user, TimeSlot slot,
+                                          AppointmentType type, AppointmentStatus status,
+                                          int participants) {
+        return switch (type) {
+            case URGENT     -> new UrgentAppointment(id, user, slot, status, participants);
+            case FOLLOW_UP  -> new FollowUpAppointment(id, user, slot, status, participants);
+            case ASSESSMENT -> new AssessmentAppointment(id, user, slot, status, participants);
+            case VIRTUAL    -> new VirtualAppointment(id, user, slot, status, participants);
+            case IN_PERSON  -> new InPersonAppointment(id, user, slot, status, participants);
+            case INDIVIDUAL -> new IndividualAppointment(id, user, slot, status, participants);
+            case GROUP      -> new GroupAppointment(id, user, slot, status, participants);
+        };
+    }
+
+    private void setStatus(String message, boolean success) {
+        statusLabel.setText(message);
+        statusLabel.setForeground(success ? new Color(30, 140, 60) : new Color(200, 40, 40));
+    }
+
+    private void styleButton(JButton button, Color color) {
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("SansSerif", Font.BOLD, 13));
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(180, 35));
     }
 }

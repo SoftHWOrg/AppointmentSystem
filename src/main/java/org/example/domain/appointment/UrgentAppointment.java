@@ -6,13 +6,6 @@ import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.enums.AppointmentType;
 import org.example.domain.valueobject.TimeSlot;
 
-/**
- * Represents an urgent/emergency appointment.
- * Short duration, single participant.
- *
- * @author
- * @version 1.0
- */
 public class UrgentAppointment extends Appointment {
 
     public UrgentAppointment(int id, User user, TimeSlot timeSlot, AppointmentStatus status, int participants) {

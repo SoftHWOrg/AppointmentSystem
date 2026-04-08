@@ -1,5 +1,6 @@
 package org.example.domain.valueobject;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -7,60 +8,46 @@ import java.time.LocalTime;
  * Represents a bookable time window on a specific date.
  * A time slot has a date, start time, end time, and an availability flag.
  *
- * This is a value object — it holds data, no business logic.
- *
  * @author
  * @version 1.0
  */
 public class TimeSlot {
 
-    // TODO: Add field: int id
-    // TODO: Add field: LocalDate date
-    // TODO: Add field: LocalTime startTime
-    // TODO: Add field: LocalTime endTime
-    // TODO: Add field: boolean available  (true = can be booked, false = already taken)
+    private int id;
+    private LocalDate date;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private boolean available;
 
-    /**
-     * Full constructor.
-     *
-     * TODO: Add parameters (id, date, startTime, endTime, available)
-     *       and assign each to its field.
-     *
-     * @param id        unique slot ID from the database
-     * @param date      the date of the slot
-     * @param startTime when the slot starts
-     * @param endTime   when the slot ends
-     * @param available whether the slot can still be booked
-     */
     public TimeSlot(int id, LocalDate date, LocalTime startTime, LocalTime endTime, boolean available) {
-        // TODO: assign all fields
+        this.id = id;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.available = available;
     }
 
-    /**
-     * Calculates the duration of this slot in minutes.
-     *
-     * TODO:
-     *  - Use java.time.Duration.between(startTime, endTime).toMinutes()
-     *  - Return as int or long
-     *
-     * @return duration in minutes
-     */
     public long getDurationInMinutes() {
-        // TODO: implement
-        return 0;
+        return Duration.between(startTime, endTime).toMinutes();
     }
 
-    // TODO: Add getters and setters for all fields:
-    //       getId(), getDate(), getStartTime(), getEndTime(), isAvailable()
-    //       setAvailable(boolean)
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    /**
-     * TODO: Override toString() to return something like:
-     *       "TimeSlot{date=2025-01-15, start=09:00, end=09:30, available=true}"
-     */
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
+
+    public LocalTime getStartTime() { return startTime; }
+    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+
+    public LocalTime getEndTime() { return endTime; }
+    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+
+    public boolean isAvailable() { return available; }
+    public void setAvailable(boolean available) { this.available = available; }
+
     @Override
     public String toString() {
-        // TODO: implement
-        return "";
+        return "TimeSlot{date=" + date + ", start=" + startTime + ", end=" + endTime + ", available=" + available + "}";
     }
 }

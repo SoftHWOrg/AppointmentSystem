@@ -14,34 +14,13 @@ import org.example.domain.valueobject.TimeSlot;
  */
 public class InPersonAppointment extends Appointment {
 
-    /**
-     * TODO: Call super(...) with AppointmentType.IN_PERSON
-     */
     public InPersonAppointment(int id, User user, TimeSlot timeSlot, AppointmentStatus status, int participants) {
         super(id, user, timeSlot, AppointmentType.IN_PERSON, status, participants);
     }
 
-    /**
-     * In-person appointments — max 60 minutes.
-     * TODO: return 60
-     *
-     * @return max duration in minutes (60)
-     */
     @Override
-    public int getMaxDuration() {
-        // TODO: return 60;
-        return 0;
-    }
+    public int getMaxDuration() { return 60; }
 
-    /**
-     * In-person allows up to 3 participants.
-     * TODO: return 3
-     *
-     * @return max participants allowed (3)
-     */
     @Override
-    public int getMaxParticipants() {
-        // TODO: return 3;
-        return 0;
-    }
+    public int getMaxParticipants() { return 3; }
 }

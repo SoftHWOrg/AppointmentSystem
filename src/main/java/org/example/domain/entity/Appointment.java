@@ -6,63 +6,54 @@ import org.example.domain.valueobject.TimeSlot;
 
 /**
  * Abstract base class for all appointment types.
- * All 7 concrete appointment types (Urgent, FollowUp, etc.) extend this class.
- *
- * Uses polymorphism (Sprint 5) — each subclass overrides getMaxDuration()
- * and getMaxParticipants() to enforce its own business rules.
+ * All 7 concrete appointment types extend this class.
  *
  * @author
  * @version 1.0
  */
 public abstract class Appointment {
 
-    // TODO: Add field: int id
-    // TODO: Add field: User user                  (who booked it)
-    // TODO: Add field: TimeSlot timeSlot          (when it is)
-    // TODO: Add field: AppointmentType type       (URGENT, FOLLOW_UP, etc.)
-    // TODO: Add field: AppointmentStatus status   (CONFIRMED, CANCELLED, PENDING)
-    // TODO: Add field: int participants           (number of people attending)
+    private int id;
+    private User user;
+    private TimeSlot timeSlot;
+    private AppointmentType type;
+    private AppointmentStatus status;
+    private int participants;
 
-    /**
-     * Full constructor.
-     *
-     * TODO: Add parameters (id, user, timeSlot, type, status, participants)
-     *       and assign each to its field.
-     */
     public Appointment(int id, User user, TimeSlot timeSlot,
                        AppointmentType type, AppointmentStatus status, int participants) {
-        // TODO: assign all fields
+        this.id = id;
+        this.user = user;
+        this.timeSlot = timeSlot;
+        this.type = type;
+        this.status = status;
+        this.participants = participants;
     }
 
-    // TODO: Add getters and setters for all fields.
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    /**
-     * Returns the maximum allowed duration in minutes for this appointment type.
-     * Each subclass must define its own limit (Sprint 5 — US5.2).
-     *
-     * Example: UrgentAppointment returns 30, GroupAppointment returns 120.
-     *
-     * @return max duration in minutes
-     */
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public TimeSlot getTimeSlot() { return timeSlot; }
+    public void setTimeSlot(TimeSlot timeSlot) { this.timeSlot = timeSlot; }
+
+    public AppointmentType getType() { return type; }
+    public void setType(AppointmentType type) { this.type = type; }
+
+    public AppointmentStatus getStatus() { return status; }
+    public void setStatus(AppointmentStatus status) { this.status = status; }
+
+    public int getParticipants() { return participants; }
+    public void setParticipants(int participants) { this.participants = participants; }
+
     public abstract int getMaxDuration();
-
-    /**
-     * Returns the maximum number of participants allowed for this appointment type.
-     * Each subclass must define its own limit (Sprint 5 — US5.2).
-     *
-     * Example: IndividualAppointment returns 1, GroupAppointment returns 20.
-     *
-     * @return max participants allowed
-     */
     public abstract int getMaxParticipants();
 
-    /**
-     * TODO: Override toString() to return a readable summary,
-     *       e.g. "Appointment{id=1, type=URGENT, status=CONFIRMED, user=John}"
-     */
     @Override
     public String toString() {
-        // TODO: implement
-        return "";
+        return "Appointment{id=" + id + ", type=" + type + ", status=" + status
+                + ", user=" + (user != null ? user.getName() : "null") + "}";
     }
 }

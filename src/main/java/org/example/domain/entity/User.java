@@ -9,47 +9,39 @@ package org.example.domain.entity;
  */
 public class User {
 
-    // TODO: Add field: int id
-    // TODO: Add field: String name
-    // TODO: Add field: String email
-    // TODO: Add field: String password  (store hashed)
-    // TODO: Add field: String role      (value: "USER" or "ADMIN")
+    private int id;
+    private String name;
+    private String email;
+    private String password;
+    private String role;
 
-    /**
-     * Default constructor.
-     * TODO: Leave empty or initialize fields to defaults.
-     */
-    public User() {
-        // TODO: implement if needed
-    }
+    public User() {}
 
-    /**
-     * Full constructor.
-     *
-     * TODO: Add parameters (id, name, email, password, role)
-     *       and assign each to its field.
-     *
-     * @param id       unique user ID from the database
-     * @param name     full name of the user
-     * @param email    user email (used for login)
-     * @param password hashed password
-     * @param role     "USER" or "ADMIN"
-     */
     public User(int id, String name, String email, String password, String role) {
-        // TODO: assign all parameters to fields
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
     }
 
-    // TODO: Add getters and setters for all fields:
-    //       getId(), getName(), getEmail(), getPassword(), getRole()
-    //       setId(), setName(), setEmail(), setPassword(), setRole()
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    /**
-     * TODO: Override toString() to return a readable summary of the user,
-     *       e.g. "User{id=1, name='John', email='john@email.com', role='USER'}"
-     */
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
     @Override
     public String toString() {
-        // TODO: implement
-        return "";
+        return "User{id=" + id + ", name='" + name + "', email='" + email + "', role='" + role + "'}";
     }
 }

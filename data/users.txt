@@ -1,0 +1,2 @@
+1|Admin User|admin@test.com|admin123|ADMIN
+2|John Doe|john@test.com|john123|USER

@@ -2,87 +2,89 @@ package org.example.service;
 
 import org.example.domain.entity.Schedule;
 import org.example.domain.valueobject.TimeSlot;
+import org.example.repository.TxtTimeSlotRepository;
 
 import java.util.List;
 
 /**
  * Manages time slot availability for the schedule.
- * Covers US1.3 — View available appointment slots.
+ * Loads slots from the text file on startup and persists every change.
  *
  * @author
  * @version 1.0
  */
 public class ScheduleService {
 
-    // TODO: Add field: Schedule schedule
-    // TODO: Add field: AppointmentRepository appointmentRepository
-    //        (needed to cross-check which slots are booked in DB)
+    private final Schedule schedule;
+    private final TxtTimeSlotRepository slotRepository;
 
     /**
-     * Constructor — inject dependencies.
+     * Constructs the service, loading all persisted slots into memory.
      *
-     * TODO:
-     *  - Assign schedule field
-     *  - Initialize schedule by loading time slots from the database
-     *
-     * @param schedule the schedule object holding all slots
+     * @param schedule       the in-memory schedule object
+     * @param slotRepository the text-file repository for slots
      */
-    public ScheduleService(Schedule schedule) {
-        // TODO: this.schedule = schedule;
+    public ScheduleService(Schedule schedule, TxtTimeSlotRepository slotRepository) {
+        this.schedule = schedule;
+        this.slotRepository = slotRepository;
+
+        // Load all previously saved slots into the in-memory schedule
+        for (TimeSlot slot : slotRepository.findAll()) {
+            schedule.addSlot(slot);
+        }
     }
 
     /**
-     * Returns all available (unbooked) time slots (US1.3).
+     * Returns all available (unbooked) time slots.
      *
-     * TODO:
-     *  - Call schedule.getAvailableSlots()
-     *  - Return the list (only slots where isAvailable() == true)
-     *
-     * @return list of available {@link TimeSlot} objects
+     * @return list of available slots
      */
     public List<TimeSlot> getAvailableSlots() {
-        // TODO: return schedule.getAvailableSlots();
-        return null;
+        return schedule.getAvailableSlots();
     }
 
     /**
-     * Adds a new time slot to the schedule (admin action).
+     * Adds a new time slot to the schedule and persists it to the file.
      *
-     * TODO:
-     *  - Validate the slot is not null
-     *  - Validate startTime is before endTime
-     *  - Call schedule.addSlot(slot)
-     *  - Also persist it to the database (INSERT INTO time_slots)
-     *
-     * @param slot the new time slot to add
+     * @param slot the new time slot
+     * @throws IllegalArgumentException if slot is null or end is before start
      */
     public void addSlot(TimeSlot slot) {
-        // TODO: implement
+        if (slot == null) throw new IllegalArgumentException("Slot cannot be null");
+        if (!slot.getEndTime().isAfter(slot.getStartTime())) {
+            throw new IllegalArgumentException("End time must be after start time");
+        }
+        slotRepository.save(slot);   // assigns the real ID and writes to file
+        schedule.addSlot(slot);      // slot now has the correct ID from the repo
     }
 
     /**
-     * Marks a slot as booked — called after a successful appointment booking.
+     * Marks a slot as booked and updates the file.
      *
-     * TODO:
-     *  - Call schedule.markSlotAsBooked(slotId)
-     *  - Also UPDATE time_slots SET is_available = false WHERE id = slotId in DB
-     *
-     * @param slotId the ID of the slot to mark as booked
+     * @param slotId the slot to mark as booked
      */
     public void bookSlot(int slotId) {
-        // TODO: implement
+        schedule.markSlotAsBooked(slotId);
+        updateSlotInFile(slotId);
     }
 
     /**
-     * Frees a slot — called when an appointment is cancelled (US4.1).
+     * Frees a slot and updates the file.
      *
-     * TODO:
-     *  - Call schedule.freeSlot(slotId)
-     *  - Also UPDATE time_slots SET is_available = true WHERE id = slotId in DB
-     *
-     * @param slotId the ID of the slot to free
+     * @param slotId the slot to mark as available again
      */
     public void freeSlot(int slotId) {
-        // TODO: implement
+        schedule.freeSlot(slotId);
+        updateSlotInFile(slotId);
+    }
+
+    // Finds the slot in memory (after updating it) and writes the new state to file
+    private void updateSlotInFile(int slotId) {
+        for (TimeSlot slot : schedule.getTimeSlots()) {
+            if (slot.getId() == slotId) {
+                slotRepository.update(slot);
+                return;
+            }
+        }
     }
 }

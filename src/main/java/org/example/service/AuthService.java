@@ -12,88 +12,72 @@ import org.example.repository.UserRepository;
  */
 public class AuthService {
 
-    // TODO: Add field: UserRepository userRepository
-    // TODO: Add field: User currentUser   (null when no one is logged in)
+    private final UserRepository userRepository;
+    private User currentUser;
 
     /**
      * Constructor — inject the repository.
      *
-     * TODO: Assign userRepository to the field.
-     *
      * @param userRepository the user data source
      */
     public AuthService(UserRepository userRepository) {
-        // TODO: this.userRepository = userRepository;
+        this.userRepository = userRepository;
     }
 
     /**
      * Attempts to log in with the given credentials (US1.1).
-     *
-     * TODO:
-     *  1. Call userRepository.findByEmail(email)
-     *  2. If user is null → throw new IllegalArgumentException("User not found")
-     *  3. Compare the provided password with user.getPassword()
-     *     (if using hashing later: use BCrypt.checkpw(password, user.getPassword()))
-     *  4. If password matches → set currentUser = user, return user
-     *  5. If password doesn't match → throw new IllegalArgumentException("Invalid password")
+     * Looks up the user by email, then validates the password.
      *
      * @param email    the user's email
      * @param password the plain-text password entered
      * @return the authenticated User
-     * @throws IllegalArgumentException if credentials are invalid
+     * @throws IllegalArgumentException if the email is not found or password is wrong
      */
     public User login(String email, String password) {
-        // TODO: implement login logic
-        return null;
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        if (!user.getPassword().equals(password)) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+
+        currentUser = user;
+        return currentUser;
     }
 
     /**
      * Logs out the current user (US1.2).
-     *
-     * TODO:
-     *  - Set currentUser = null
-     *
-     * After this, any action requiring login must call login() again.
      */
     public void logout() {
-        // TODO: currentUser = null;
+        currentUser = null;
     }
 
     /**
-     * Returns the currently logged-in user.
+     * Returns the currently logged-in user, or null if nobody is logged in.
      *
-     * TODO: return currentUser;
-     *
-     * @return the logged-in User, or null if nobody is logged in
+     * @return the logged-in User, or null
      */
     public User getCurrentUser() {
-        // TODO: return currentUser;
-        return null;
+        return currentUser;
     }
 
     /**
      * Checks whether any user is currently logged in.
      *
-     * TODO: return currentUser != null;
-     *
      * @return true if a user is logged in
      */
     public boolean isLoggedIn() {
-        // TODO: return currentUser != null;
-        return false;
+        return currentUser != null;
     }
 
     /**
      * Checks whether the currently logged-in user is an administrator.
      *
-     * TODO:
-     *  - Check if currentUser is not null
-     *  - Return currentUser.getRole().equals("ADMIN")
-     *
-     * @return true if the current user is an admin
+     * @return true if the current user has the ADMIN role
      */
     public boolean isAdmin() {
-        // TODO: implement
-        return false;
+        return currentUser != null && "ADMIN".equals(currentUser.getRole());
     }
 }

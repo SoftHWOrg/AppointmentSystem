@@ -116,6 +116,8 @@ public class TxtAppointmentRepository implements AppointmentRepository {
             case IN_PERSON  -> new InPersonAppointment(id, user, slot, status, participants);
             case INDIVIDUAL -> new IndividualAppointment(id, user, slot, status, participants);
             case GROUP      -> new GroupAppointment(id, user, slot, status, participants);
+            case DEFAULT    -> new DefaultAppointment(id, user, slot, status, participants);
+            case CUSTOM     -> new CustomAppointment(id, user, slot, status, participants);
         };
     }
 

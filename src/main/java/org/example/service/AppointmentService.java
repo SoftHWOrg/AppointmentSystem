@@ -12,16 +12,34 @@ import java.util.List;
 public class AppointmentService {
 
     
+    private final AppointmentRepository appointmentRepository;
+    private final ScheduleService scheduleService;
+    private final ReminderService reminderService;
+    private final List<BookingRuleStrategy> rules;
+
     public AppointmentService(AppointmentRepository appointmentRepository,
                               ScheduleService scheduleService,
                               ReminderService reminderService,
                               List<BookingRuleStrategy> rules) {
-
+        this.appointmentRepository = appointmentRepository;
+        this.scheduleService = scheduleService;
+        this.reminderService = reminderService;
+        this.rules = rules;
     }
 
     
     public void bookAppointment(Appointment appointment) {
+        if (rules != null) {
+            for (BookingRuleStrategy rule : rules) {
+                if (!rule.isValid(appointment)) {
+                    throw new IllegalArgumentException(rule.getErrorMessage());
+                }
+            }
+        }
 
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointmentRepository.save(appointment);
+        scheduleService.bookSlot(appointment.getTimeSlot().getId());
     }
 
     
@@ -36,13 +54,11 @@ public class AppointmentService {
 
     
     public List<Appointment> getAppointmentsForUser(int userId) {
-
-        return null;
+        return appointmentRepository.findByUserId(userId);
     }
 
     
     public List<Appointment> getAllAppointments(User requestingUser) {
-
-        return null;
+        return appointmentRepository.findAll();
     }
 }

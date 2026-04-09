@@ -15,6 +15,7 @@ public class MainFrame extends JFrame {
     public static final String APPOINTMENT_PANEL = "APPOINTMENT";
     public static final String MY_APPTS_PANEL    = "MY_APPOINTMENTS";
     public static final String ADMIN_PANEL       = "ADMIN";
+    public static final String CUSTOM_APPOINTMENT_PANEL = "CUSTOM_APPOINTMENT";
 
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
@@ -23,6 +24,7 @@ public class MainFrame extends JFrame {
     private final AppointmentPanel appointmentPanel;
     private final MyAppointmentsPanel myApptsPanel;
     private final AdminPanel adminPanel;
+    private final CustomAppointmentPanel customAppointmentPanel;
 
     public MainFrame(AuthService authService,
                      AppointmentService appointmentService,
@@ -43,12 +45,14 @@ public class MainFrame extends JFrame {
         appointmentPanel               = new AppointmentPanel(this, authService, appointmentService, scheduleService);
         myApptsPanel                   = new MyAppointmentsPanel(this, authService, appointmentService);
         adminPanel                     = new AdminPanel(this, authService, appointmentService, scheduleService);
+        customAppointmentPanel         = new CustomAppointmentPanel(this, authService, appointmentService, scheduleService);
 
         mainPanel.add(loginPanel,      LOGIN_PANEL);
         mainPanel.add(dashboardPanel,  DASHBOARD_PANEL);
         mainPanel.add(appointmentPanel, APPOINTMENT_PANEL);
         mainPanel.add(myApptsPanel,    MY_APPTS_PANEL);
         mainPanel.add(adminPanel,      ADMIN_PANEL);
+        mainPanel.add(customAppointmentPanel, CUSTOM_APPOINTMENT_PANEL);
 
         add(mainPanel);
         cardLayout.show(mainPanel, LOGIN_PANEL);
@@ -64,6 +68,7 @@ public class MainFrame extends JFrame {
             case APPOINTMENT_PANEL -> appointmentPanel.loadAvailableSlots();
             case MY_APPTS_PANEL    -> myApptsPanel.loadAppointments();
             case ADMIN_PANEL       -> adminPanel.loadAllAppointments();
+            case CUSTOM_APPOINTMENT_PANEL -> customAppointmentPanel.clearFields();
         }
     }
 }

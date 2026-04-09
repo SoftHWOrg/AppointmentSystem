@@ -1,0 +1,2 @@
+1|Admin User|admin@email.com|admin123|ADMIN
+2|Regular User|user@email.com|user123|USER

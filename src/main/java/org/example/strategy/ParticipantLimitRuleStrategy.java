@@ -4,17 +4,14 @@ import org.example.domain.entity.Appointment;
 
 public class ParticipantLimitRuleStrategy implements BookingRuleStrategy {
 
-    
     @Override
     public boolean isValid(Appointment appointment) {
-
-        return false;
+        if (appointment == null) return false;
+        return appointment.getParticipants() <= appointment.getMaxParticipants();
     }
 
-    
     @Override
     public String getErrorMessage() {
-
-        return "";
+        return "The number of participants exceeds the maximum allowed for this appointment type.";
     }
 }

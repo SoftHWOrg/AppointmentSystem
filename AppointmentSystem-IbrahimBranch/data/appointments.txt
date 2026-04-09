@@ -1,1 +1,0 @@
-1|2|Regular User|user@email.com|user123|USER|5|2026-04-10|14:00|15:00|true|DEFAULT|CONFIRMED|1

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TxtUserRepository implements UserRepository {
 
-    private static final String FILE_PATH = "data/users.txt";
+    private static final String FILE_PATH = "C:\\Users\\ibrah\\Downloads\\AppointmentSystem-IbrahimBranch\\AppointmentSystem-IbrahimBranch\\data\\users.txt";
     private static final String DELIMITER = "|";
     private static final String DELIMITER_REGEX = "\\|";
 
@@ -56,15 +56,17 @@ public class TxtUserRepository implements UserRepository {
     }
 
     private User parseLine(String line) {
-        if (line == null || line.isBlank()) return null;
+        if (line == null || line.isBlank())
+            return null;
         String[] parts = line.split(DELIMITER_REGEX, -1);
-        if (parts.length < 5) return null;
+        if (parts.length < 5)
+            return null;
 
-        int id           = Integer.parseInt(parts[0].trim());
-        String name      = parts[1].trim();
-        String email     = parts[2].trim();
-        String password  = parts[3].trim();
-        String role      = parts[4].trim();
+        int id = Integer.parseInt(parts[0].trim());
+        String name = parts[1].trim();
+        String email = parts[2].trim();
+        String password = parts[3].trim();
+        String role = parts[4].trim();
 
         if ("ADMIN".equals(role)) {
             return new Administrator(id, name, email, password);
@@ -75,12 +77,15 @@ public class TxtUserRepository implements UserRepository {
     private int nextId(List<String> lines) {
         int max = 0;
         for (String line : lines) {
-            if (line.isBlank()) continue;
+            if (line.isBlank())
+                continue;
             String[] parts = line.split(DELIMITER_REGEX, -1);
             try {
                 int id = Integer.parseInt(parts[0].trim());
-                if (id > max) max = id;
-            } catch (NumberFormatException ignored) {}
+                if (id > max)
+                    max = id;
+            } catch (NumberFormatException ignored) {
+            }
         }
         return max + 1;
     }

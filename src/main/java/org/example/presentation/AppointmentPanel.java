@@ -27,7 +27,6 @@ public class AppointmentPanel extends JPanel {
     private DefaultListModel<String> slotModel;
     private JList<String> slotList;
     private List<TimeSlot> availableSlots;
-    private JComboBox<AppointmentType> typeCombo;
     private JSpinner participantsSpinner;
     private JLabel statusLabel;
 
@@ -93,26 +92,30 @@ public class AppointmentPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(new JLabel("Appointment Type:"), gbc);
-        typeCombo = new JComboBox<>(AppointmentType.values());
-        typeCombo.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        gbc.gridx = 1;
-        formPanel.add(typeCombo, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1;
         formPanel.add(new JLabel("Participants:"), gbc);
         participantsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
         participantsSpinner.setFont(new Font("SansSerif", Font.PLAIN, 13));
         gbc.gridx = 1;
         formPanel.add(participantsSpinner, gbc);
 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+
         JButton bookButton = new JButton("Book Appointment");
         styleButton(bookButton, new Color(25, 140, 60));
-        bookButton.addActionListener(e -> handleBooking());
+        bookButton.addActionListener(e -> handleBooking(AppointmentType.DEFAULT));
+        
+        JButton customBookButton = new JButton("Book Custom Appointment");
+        styleButton(customBookButton, new Color(25, 80, 170));
+        customBookButton.addActionListener(e -> mainFrame.showPanel(MainFrame.CUSTOM_APPOINTMENT_PANEL));
+        
+        buttonPanel.add(bookButton);
+        buttonPanel.add(customBookButton);
+
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(bookButton, gbc);
+        formPanel.add(buttonPanel, gbc);
 
         add(formPanel, BorderLayout.CENTER);
 
@@ -140,7 +143,7 @@ public class AppointmentPanel extends JPanel {
         statusLabel.setText(" ");
     }
 
-    private void handleBooking() {
+    private void handleBooking(AppointmentType selectedType) {
         int selectedIndex = slotList.getSelectedIndex();
         if (selectedIndex < 0 || availableSlots == null || availableSlots.isEmpty()) {
             setStatus("Please select a time slot.", false);
@@ -148,7 +151,6 @@ public class AppointmentPanel extends JPanel {
         }
 
         TimeSlot selectedSlot = availableSlots.get(selectedIndex);
-        AppointmentType selectedType = (AppointmentType) typeCombo.getSelectedItem();
         int participants = (int) participantsSpinner.getValue();
         User currentUser = authService.getCurrentUser();
 
@@ -175,6 +177,8 @@ public class AppointmentPanel extends JPanel {
             case IN_PERSON  -> new InPersonAppointment(id, user, slot, status, participants);
             case INDIVIDUAL -> new IndividualAppointment(id, user, slot, status, participants);
             case GROUP      -> new GroupAppointment(id, user, slot, status, participants);
+            case DEFAULT    -> new DefaultAppointment(id, user, slot, status, participants);
+            case CUSTOM     -> new CustomAppointment(id, user, slot, status, participants);
         };
     }
 

@@ -6,12 +6,6 @@ import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.enums.AppointmentType;
 import org.example.domain.valueobject.TimeSlot;
 
-/**
- * Represents a group appointment with multiple participants.
- *
- * @author
- * @version 1.0
- */
 public class GroupAppointment extends Appointment {
 
     public GroupAppointment(int id, User user, TimeSlot timeSlot, AppointmentStatus status, int participants) {

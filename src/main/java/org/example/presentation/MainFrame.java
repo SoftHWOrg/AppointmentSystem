@@ -8,13 +8,6 @@ import org.example.service.ScheduleService;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * The main application window.
- * Uses CardLayout to switch between all panels without opening new windows.
- *
- * @author
- * @version 1.0
- */
 public class MainFrame extends JFrame {
 
     public static final String LOGIN_PANEL       = "LOGIN";
@@ -26,7 +19,6 @@ public class MainFrame extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
 
-    // Keep references to panels that need refreshing
     private final DashboardPanel dashboardPanel;
     private final AppointmentPanel appointmentPanel;
     private final MyAppointmentsPanel myApptsPanel;
@@ -46,14 +38,12 @@ public class MainFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Create all panels
         LoginPanel loginPanel          = new LoginPanel(this, authService);
         dashboardPanel                 = new DashboardPanel(this, authService);
         appointmentPanel               = new AppointmentPanel(this, authService, appointmentService, scheduleService);
         myApptsPanel                   = new MyAppointmentsPanel(this, authService, appointmentService);
         adminPanel                     = new AdminPanel(this, authService, appointmentService, scheduleService);
 
-        // Register all panels
         mainPanel.add(loginPanel,      LOGIN_PANEL);
         mainPanel.add(dashboardPanel,  DASHBOARD_PANEL);
         mainPanel.add(appointmentPanel, APPOINTMENT_PANEL);
@@ -65,11 +55,7 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    /**
-     * Switches the visible panel and refreshes its content.
-     *
-     * @param panelName one of the panel name constants defined in this class
-     */
+    
     public void showPanel(String panelName) {
         cardLayout.show(mainPanel, panelName);
 

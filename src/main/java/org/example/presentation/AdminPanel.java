@@ -15,12 +15,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-/**
- * Admin-only panel for managing all reservations in the system (US4.2).
- *
- * @author
- * @version 1.0
- */
 public class AdminPanel extends JPanel {
 
     private final MainFrame mainFrame;
@@ -47,7 +41,6 @@ public class AdminPanel extends JPanel {
         setBackground(new Color(240, 244, 248));
         setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // ── Top bar ────────────────────────────────────────────
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(new Color(240, 244, 248));
 
@@ -62,7 +55,6 @@ public class AdminPanel extends JPanel {
         topBar.add(backButton, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
-        // ── Center: all appointments table ─────────────────────
         String[] columns = {"ID", "User", "Type", "Date", "Start Time", "Status", "Participants"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -76,7 +68,6 @@ public class AdminPanel extends JPanel {
         allAppointmentsTable.setGridColor(new Color(220, 230, 245));
         add(new JScrollPane(allAppointmentsTable), BorderLayout.CENTER);
 
-        // ── Bottom bar ─────────────────────────────────────────
         JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         bottomBar.setBackground(new Color(240, 244, 248));
 
@@ -102,9 +93,7 @@ public class AdminPanel extends JPanel {
         add(bottomBar, BorderLayout.SOUTH);
     }
 
-    /**
-     * Loads ALL appointments into the table.
-     */
+    
     public void loadAllAppointments() {
         tableModel.setRowCount(0);
         if (authService.getCurrentUser() == null) return;

@@ -17,12 +17,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Panel for viewing available time slots and booking a new appointment (US1.3, US2.1).
- *
- * @author
- * @version 1.0
- */
 public class AppointmentPanel extends JPanel {
 
     private final MainFrame mainFrame;
@@ -54,7 +48,6 @@ public class AppointmentPanel extends JPanel {
         setBackground(new Color(240, 244, 248));
         setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // ── Top bar ────────────────────────────────────────────
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(new Color(240, 244, 248));
 
@@ -69,7 +62,6 @@ public class AppointmentPanel extends JPanel {
         topBar.add(backButton, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
-        // ── Left: available slots list ─────────────────────────
         slotModel = new DefaultListModel<>();
         slotList = new JList<>(slotModel);
         slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -84,7 +76,6 @@ public class AppointmentPanel extends JPanel {
                 new Color(25, 80, 170)));
         add(slotScroll, BorderLayout.WEST);
 
-        // ── Right: booking form ────────────────────────────────
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
         formPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -101,7 +92,6 @@ public class AppointmentPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Type
         gbc.gridx = 0; gbc.gridy = 0;
         formPanel.add(new JLabel("Appointment Type:"), gbc);
         typeCombo = new JComboBox<>(AppointmentType.values());
@@ -109,7 +99,6 @@ public class AppointmentPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(typeCombo, gbc);
 
-        // Participants
         gbc.gridx = 0; gbc.gridy = 1;
         formPanel.add(new JLabel("Participants:"), gbc);
         participantsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
@@ -117,7 +106,6 @@ public class AppointmentPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(participantsSpinner, gbc);
 
-        // Book button
         JButton bookButton = new JButton("Book Appointment");
         styleButton(bookButton, new Color(25, 140, 60));
         bookButton.addActionListener(e -> handleBooking());
@@ -128,16 +116,13 @@ public class AppointmentPanel extends JPanel {
 
         add(formPanel, BorderLayout.CENTER);
 
-        // ── Bottom: status label ───────────────────────────────
         statusLabel = new JLabel(" ", SwingConstants.CENTER);
         statusLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         statusLabel.setBorder(new EmptyBorder(5, 0, 5, 0));
         add(statusLabel, BorderLayout.SOUTH);
     }
 
-    /**
-     * Reloads the available slots from the schedule service.
-     */
+    
     public void loadAvailableSlots() {
         slotModel.clear();
         availableSlots = scheduleService.getAvailableSlots();

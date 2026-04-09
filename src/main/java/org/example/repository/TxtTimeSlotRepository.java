@@ -9,14 +9,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Text-file implementation for TimeSlot persistence.
- * Each slot is stored as one line in data/timeslots.txt using pipe-delimited fields:
- *   id|date|startTime|endTime|available
- *
- * @author
- * @version 1.0
- */
 public class TxtTimeSlotRepository {
 
     private static final String FILE_PATH = "data/timeslots.txt";
@@ -39,10 +31,6 @@ public class TxtTimeSlotRepository {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // File I/O helpers
-    // -------------------------------------------------------------------------
-
     private List<String> readAllLines() {
         try {
             return new ArrayList<>(Files.readAllLines(Paths.get(FILE_PATH)));
@@ -60,10 +48,6 @@ public class TxtTimeSlotRepository {
             throw new RuntimeException("Error writing timeslots file", e);
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Serialise / deserialise
-    // -------------------------------------------------------------------------
 
     private String toLine(TimeSlot slot) {
         return slot.getId() + DELIMITER
@@ -100,15 +84,7 @@ public class TxtTimeSlotRepository {
         return max + 1;
     }
 
-    // =========================================================================
-    // Public methods
-    // =========================================================================
-
-    /**
-     * Saves a new time slot, auto-assigning its ID.
-     *
-     * @param slot the slot to save (id will be overwritten)
-     */
+    
     public void save(TimeSlot slot) {
         List<String> lines = readAllLines();
         slot.setId(nextId(lines));
@@ -116,9 +92,7 @@ public class TxtTimeSlotRepository {
         writeAllLines(lines);
     }
 
-    /**
-     * Returns all stored time slots.
-     */
+    
     public List<TimeSlot> findAll() {
         List<TimeSlot> result = new ArrayList<>();
         for (String line : readAllLines()) {
@@ -128,11 +102,7 @@ public class TxtTimeSlotRepository {
         return result;
     }
 
-    /**
-     * Updates a slot's availability in the file.
-     *
-     * @param slot the slot with the updated available flag
-     */
+    
     public void update(TimeSlot slot) {
         List<String> lines = readAllLines();
         for (int i = 0; i < lines.size(); i++) {

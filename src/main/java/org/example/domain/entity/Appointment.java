@@ -4,13 +4,6 @@ import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.enums.AppointmentType;
 import org.example.domain.valueobject.TimeSlot;
 
-/**
- * Abstract base class for all appointment types.
- * All 7 concrete appointment types extend this class.
- *
- * @author
- * @version 1.0
- */
 public abstract class Appointment {
 
     private int id;

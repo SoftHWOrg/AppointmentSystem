@@ -15,15 +15,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Text-file implementation of {@link AppointmentRepository}.
- * Each appointment is stored as one line in data/appointments.txt using
- * pipe-delimited fields (user and time-slot data are embedded per line):
- *
- *   id|userId|userName|userEmail|userPassword|userRole|
- *   slotId|slotDate|slotStartTime|slotEndTime|slotAvailable|
- *   type|status|participants
- */
 public class TxtAppointmentRepository implements AppointmentRepository {
 
     private static final String FILE_PATH = "data/appointments.txt";
@@ -46,10 +37,6 @@ public class TxtAppointmentRepository implements AppointmentRepository {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // File I/O helpers
-    // -------------------------------------------------------------------------
-
     private List<String> readAllLines() {
         try {
             return new ArrayList<>(Files.readAllLines(Paths.get(FILE_PATH)));
@@ -67,10 +54,6 @@ public class TxtAppointmentRepository implements AppointmentRepository {
             throw new RuntimeException("Error writing appointments file", e);
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Serialise an Appointment to a pipe-delimited line
-    // -------------------------------------------------------------------------
 
     private String toLine(Appointment a) {
         User u = a.getUser();
@@ -90,10 +73,6 @@ public class TxtAppointmentRepository implements AppointmentRepository {
                 + a.getStatus().name() + DELIMITER
                 + a.getParticipants();
     }
-
-    // -------------------------------------------------------------------------
-    // Deserialise a pipe-delimited line into the correct Appointment subclass
-    // -------------------------------------------------------------------------
 
     private Appointment parseLine(String line) {
         if (line == null || line.isBlank()) return null;
@@ -140,10 +119,6 @@ public class TxtAppointmentRepository implements AppointmentRepository {
         };
     }
 
-    // -------------------------------------------------------------------------
-    // Auto-generate next ID
-    // -------------------------------------------------------------------------
-
     private int nextId(List<String> lines) {
         int max = 0;
         for (String line : lines) {
@@ -156,10 +131,6 @@ public class TxtAppointmentRepository implements AppointmentRepository {
         }
         return max + 1;
     }
-
-    // =========================================================================
-    // Repository methods
-    // =========================================================================
 
     @Override
     public void save(Appointment appointment) {

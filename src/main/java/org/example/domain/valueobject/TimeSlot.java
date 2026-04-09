@@ -4,13 +4,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/**
- * Represents a bookable time window on a specific date.
- * A time slot has a date, start time, end time, and an availability flag.
- *
- * @author
- * @version 1.0
- */
 public class TimeSlot {
 
     private int id;

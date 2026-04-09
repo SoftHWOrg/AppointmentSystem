@@ -7,11 +7,6 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.List;
 
-/**
- * Text-file implementation of {@link UserRepository}.
- * Each user is stored as one line in data/users.txt using pipe-delimited fields:
- *   id|name|email|password|role
- */
 public class TxtUserRepository implements UserRepository {
 
     private static final String FILE_PATH = "data/users.txt";
@@ -34,10 +29,6 @@ public class TxtUserRepository implements UserRepository {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Read all lines from the file
-    // -------------------------------------------------------------------------
-
     private List<String> readAllLines() {
         try {
             return Files.readAllLines(Paths.get(FILE_PATH));
@@ -45,10 +36,6 @@ public class TxtUserRepository implements UserRepository {
             throw new RuntimeException("Error reading users file", e);
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Write all lines back to the file (overwrite)
-    // -------------------------------------------------------------------------
 
     private void writeAllLines(List<String> lines) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_PATH, false))) {
@@ -60,10 +47,6 @@ public class TxtUserRepository implements UserRepository {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Convert a User to a pipe-delimited line
-    // -------------------------------------------------------------------------
-
     private String toLine(User user) {
         return user.getId() + DELIMITER
                 + user.getName() + DELIMITER
@@ -71,10 +54,6 @@ public class TxtUserRepository implements UserRepository {
                 + user.getPassword() + DELIMITER
                 + user.getRole();
     }
-
-    // -------------------------------------------------------------------------
-    // Parse a pipe-delimited line into a User (or Administrator)
-    // -------------------------------------------------------------------------
 
     private User parseLine(String line) {
         if (line == null || line.isBlank()) return null;
@@ -93,10 +72,6 @@ public class TxtUserRepository implements UserRepository {
         return new User(id, name, email, password, role);
     }
 
-    // -------------------------------------------------------------------------
-    // Auto-generate the next available ID
-    // -------------------------------------------------------------------------
-
     private int nextId(List<String> lines) {
         int max = 0;
         for (String line : lines) {
@@ -109,10 +84,6 @@ public class TxtUserRepository implements UserRepository {
         }
         return max + 1;
     }
-
-    // =========================================================================
-    // Repository methods
-    // =========================================================================
 
     @Override
     public void save(User user) {

@@ -6,14 +6,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-/**
- * The main dashboard shown after login.
- * Admin users see only Admin Panel + Logout.
- * Regular users see Book Appointment + My Appointments + Logout.
- *
- * @author
- * @version 1.0
- */
 public class DashboardPanel extends JPanel {
 
     private final MainFrame mainFrame;
@@ -34,14 +26,12 @@ public class DashboardPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(240, 244, 248));
 
-        // ── Top: welcome label ─────────────────────────────────
         welcomeLabel = new JLabel("Welcome!", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         welcomeLabel.setForeground(new Color(25, 80, 170));
         welcomeLabel.setBorder(new EmptyBorder(30, 0, 10, 0));
         add(welcomeLabel, BorderLayout.NORTH);
 
-        // ── Center: navigation buttons (BoxLayout — no gaps for hidden buttons) ──
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
         btnPanel.setBackground(new Color(240, 244, 248));
@@ -65,7 +55,6 @@ public class DashboardPanel extends JPanel {
             mainFrame.showPanel(MainFrame.LOGIN_PANEL);
         });
 
-        // All buttons hidden by default — refresh() shows the right ones
         bookButton.setVisible(false);
         myApptsButton.setVisible(false);
         adminButton.setVisible(false);
@@ -84,13 +73,7 @@ public class DashboardPanel extends JPanel {
         add(wrapper, BorderLayout.CENTER);
     }
 
-    /**
-     * Refreshes the welcome label and shows only the buttons relevant to the
-     * current user's role.
-     *
-     * Admin  → Admin Panel + Logout
-     * User   → Book Appointment + My Appointments + Logout
-     */
+    
     public void refresh() {
         if (authService.getCurrentUser() == null) return;
 

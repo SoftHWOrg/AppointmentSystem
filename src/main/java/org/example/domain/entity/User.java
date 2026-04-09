@@ -1,12 +1,5 @@
 package org.example.domain.entity;
 
-/**
- * Represents a regular user of the appointment system.
- * Administrators extend this class.
- *
- * @author
- * @version 1.0
- */
 public class User {
 
     private int id;

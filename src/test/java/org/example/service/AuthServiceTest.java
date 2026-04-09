@@ -4,87 +4,90 @@ import org.example.domain.entity.User;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for {@link AuthService}.
- * Uses Mockito to mock UserRepository — no real DB needed.
- *
- * @author
- * @version 1.0
- */
 class AuthServiceTest {
 
-    // TODO: Add field: UserRepository mockUserRepo  (Mockito mock)
-    // TODO: Add field: AuthService authService
+    private AuthService authService;
 
-    /**
-     * Sets up fresh mocks before each test.
-     *
-     * TODO:
-     *  mockUserRepo = Mockito.mock(UserRepository.class);
-     *  authService  = new AuthService(mockUserRepo);
-     */
+    static class StubUserRepository implements UserRepository {
+        private User storedUser;
+
+        void setUserToReturn(User user) {
+            this.storedUser = user;
+        }
+
+        @Override
+        public User findByEmail(String email) {
+            if (storedUser != null && storedUser.getEmail().equals(email)) {
+                return storedUser;
+            }
+            return null;
+        }
+
+        @Override
+        public void save(User user) {
+        }
+
+        @Override
+        public User findById(int id) {
+            return null;
+        }
+
+        @Override
+        public void update(User user) {
+        }
+    }
+
+    private StubUserRepository stubRepo;
+
     @BeforeEach
     void setUp() {
-        // TODO: initialize mocks and authService
+        stubRepo = new StubUserRepository();
+        authService = new AuthService(stubRepo);
     }
 
-    /**
-     * US1.1 — Valid credentials should return the user and set currentUser.
-     *
-     * TODO:
-     *  1. Create a fake User: new User(1, "John", "john@email.com", "pass123", "USER")
-     *  2. Stub the mock: when(mockUserRepo.findByEmail("john@email.com")).thenReturn(fakeUser)
-     *  3. Call: User result = authService.login("john@email.com", "pass123")
-     *  4. Assert: assertNotNull(result)
-     *  5. Assert: assertEquals("John", result.getName())
-     *  6. Assert: assertTrue(authService.isLoggedIn())
-     */
     @Test
     void testLogin_validCredentials_returnsUser() {
-        // TODO: implement test
+        User fakeUser = new User(1, "Admin User", "admin@email.com", "pass123", "ADMIN");
+        stubRepo.setUserToReturn(fakeUser);
+
+        User result = authService.login("admin@email.com", "pass123");
+
+        assertNotNull(result);
+        assertEquals("Admin User", result.getName());
+        assertTrue(authService.isLoggedIn());
+        assertEquals(fakeUser, authService.getCurrentUser());
     }
 
-    /**
-     * US1.1 — Invalid password should throw IllegalArgumentException.
-     *
-     * TODO:
-     *  1. Stub mockUserRepo to return a user with password "correct"
-     *  2. Call authService.login(email, "wrong") inside assertThrows(...)
-     *  3. assertThrows(IllegalArgumentException.class, () -> authService.login(...))
-     */
     @Test
     void testLogin_invalidPassword_throwsException() {
-        // TODO: implement test
+        User fakeUser = new User(1, "Admin User", "admin@email.com", "correct", "ADMIN");
+        stubRepo.setUserToReturn(fakeUser);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            authService.login("admin@email.com", "wrongpassword");
+        });
     }
 
-    /**
-     * US1.1 — Unknown email should throw IllegalArgumentException.
-     *
-     * TODO:
-     *  1. Stub: when(mockUserRepo.findByEmail("unknown@email.com")).thenReturn(null)
-     *  2. assertThrows(IllegalArgumentException.class, () -> authService.login("unknown@email.com", "any"))
-     */
     @Test
     void testLogin_unknownEmail_throwsException() {
-        // TODO: implement test
+        assertThrows(IllegalArgumentException.class, () -> {
+            authService.login("unknown@email.com", "anypass");
+        });
     }
 
-    /**
-     * US1.2 — After logout, isLoggedIn() should return false.
-     *
-     * TODO:
-     *  1. Log in first (set up a valid mock + call authService.login)
-     *  2. Call authService.logout()
-     *  3. assertFalse(authService.isLoggedIn())
-     *  4. assertNull(authService.getCurrentUser())
-     */
     @Test
     void testLogout_clearsCurrentUser() {
-        // TODO: implement test
+        User fakeUser = new User(1, "Admin", "admin@email.com", "pass", "ADMIN");
+        stubRepo.setUserToReturn(fakeUser);
+        authService.login("admin@email.com", "pass");
+        assertTrue(authService.isLoggedIn());
+
+        authService.logout();
+
+        assertFalse(authService.isLoggedIn());
+        assertNull(authService.getCurrentUser());
     }
 }

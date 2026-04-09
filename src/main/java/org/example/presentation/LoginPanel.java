@@ -3,63 +3,110 @@ package org.example.presentation;
 import org.example.service.AuthService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-/**
- * The login screen panel.
- * Displayed first when the application starts (US1.1).
- *
- * Layout:
- *  - Title label: "Appointment Scheduling System"
- *  - Email text field
- *  - Password field (JPasswordField — hides input)
- *  - Login button
- *  - Error label (shown in red when login fails)
- *
- * @author
- * @version 1.0
- */
 public class LoginPanel extends JPanel {
 
-    // TODO: Add field: MainFrame mainFrame     (for navigation after login)
-    // TODO: Add field: AuthService authService
-    // TODO: Add field: JTextField emailField
-    // TODO: Add field: JPasswordField passwordField
-    // TODO: Add field: JLabel errorLabel       (displays error messages)
+    private final MainFrame mainFrame;
+    private final AuthService authService;
+    private JTextField emailField;
+    private JPasswordField passwordField;
+    private JLabel errorLabel;
 
-    /**
-     * Constructor — builds the login UI.
-     *
-     * TODO:
-     *  1. Assign mainFrame and authService fields
-     *  2. Set layout: e.g. new BorderLayout() or new GridBagLayout()
-     *  3. Create a center panel with:
-     *       - JLabel("Email:") + emailField (JTextField)
-     *       - JLabel("Password:") + passwordField (JPasswordField)
-     *       - loginButton (JButton("Login"))
-     *       - errorLabel (JLabel(""), set foreground to Color.RED)
-     *  4. Add ActionListener to loginButton → call handleLogin()
-     *  5. Add a title label at the top
-     *
-     * @param mainFrame   the parent window (for navigation)
-     * @param authService the authentication service
-     */
     public LoginPanel(MainFrame mainFrame, AuthService authService) {
-        // TODO: build the login UI
+        this.mainFrame = mainFrame;
+        this.authService = authService;
+        buildUI();
     }
 
-    /**
-     * Handles the login button click.
-     *
-     * TODO:
-     *  1. Read email from emailField.getText()
-     *  2. Read password from new String(passwordField.getPassword())
-     *  3. Call authService.login(email, password)
-     *  4. If login succeeds → call mainFrame.showPanel(MainFrame.DASHBOARD_PANEL)
-     *  5. If login throws IllegalArgumentException → show error in errorLabel
-     *     e.g. errorLabel.setText("Invalid email or password")
-     */
+    private void buildUI() {
+        setLayout(new BorderLayout());
+        setBackground(new Color(240, 244, 248));
+
+        JLabel titleLabel = new JLabel("Appointment Scheduling System", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        titleLabel.setForeground(new Color(25, 80, 170));
+        titleLabel.setBorder(new EmptyBorder(30, 0, 10, 0));
+        add(titleLabel, BorderLayout.NORTH);
+
+        JPanel card = new JPanel(new GridBagLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 210, 230), 1),
+                new EmptyBorder(30, 40, 30, 40)));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel loginTitle = new JLabel("Sign In", SwingConstants.CENTER);
+        loginTitle.setFont(new Font("SansSerif", Font.BOLD, 17));
+        loginTitle.setForeground(new Color(40, 40, 40));
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        card.add(loginTitle, gbc);
+
+        gbc.gridwidth = 1; gbc.gridy = 1; gbc.gridx = 0;
+        card.add(new JLabel("Email:"), gbc);
+        emailField = new JTextField(20);
+        emailField.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        gbc.gridx = 1;
+        card.add(emailField, gbc);
+
+        gbc.gridy = 2; gbc.gridx = 0;
+        card.add(new JLabel("Password:"), gbc);
+        passwordField = new JPasswordField(20);
+        passwordField.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        gbc.gridx = 1;
+        card.add(passwordField, gbc);
+
+        JButton loginButton = new JButton("Login");
+        styleButton(loginButton, new Color(25, 100, 200));
+        gbc.gridy = 3; gbc.gridx = 0; gbc.gridwidth = 2;
+        card.add(loginButton, gbc);
+
+        errorLabel = new JLabel(" ", SwingConstants.CENTER);
+        errorLabel.setForeground(new Color(200, 40, 40));
+        errorLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        gbc.gridy = 4;
+        card.add(errorLabel, gbc);
+
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(240, 244, 248));
+        wrapper.add(card);
+        add(wrapper, BorderLayout.CENTER);
+
+        loginButton.addActionListener(e -> handleLogin());
+        passwordField.addActionListener(e -> handleLogin());
+    }
+
     private void handleLogin() {
-        // TODO: implement login handler
+        String email = emailField.getText().trim();
+        String password = new String(passwordField.getPassword());
+
+        if (email.isEmpty() || password.isEmpty()) {
+            errorLabel.setText("Please enter both email and password.");
+            return;
+        }
+
+        try {
+            authService.login(email, password);
+            errorLabel.setText(" ");
+            passwordField.setText("");
+            mainFrame.showPanel(MainFrame.DASHBOARD_PANEL);
+        } catch (IllegalArgumentException ex) {
+            errorLabel.setText(ex.getMessage());
+        }
+    }
+
+    private void styleButton(JButton button, Color color) {
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("SansSerif", Font.BOLD, 13));
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(180, 35));
     }
 }

@@ -6,12 +6,6 @@ import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.enums.AppointmentType;
 import org.example.domain.valueobject.TimeSlot;
 
-/**
- * Represents a follow-up appointment after a previous visit.
- *
- * @author
- * @version 1.0
- */
 public class FollowUpAppointment extends Appointment {
 
     public FollowUpAppointment(int id, User user, TimeSlot timeSlot, AppointmentStatus status, int participants) {

@@ -13,8 +13,12 @@ public class CustomAppointment extends Appointment {
     }
 
     @Override
-    public int getMaxDuration() { return 30; }
+    public int getMaxDuration() {
+        return 60;
+    }
 
     @Override
-    public int getMaxParticipants() { return 5; }
+    public int getMaxParticipants() {
+        return 5;
+    }
 }

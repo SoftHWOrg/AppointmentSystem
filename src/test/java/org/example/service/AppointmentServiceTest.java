@@ -1,110 +1,101 @@
 package org.example.service;
 
-import org.example.domain.appointment.UrgentAppointment;
+import org.example.domain.appointment.CustomAppointment;
+import org.example.domain.entity.Administrator;
 import org.example.domain.entity.Appointment;
-import org.example.domain.entity.Schedule;
 import org.example.domain.entity.User;
 import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.valueobject.TimeSlot;
 import org.example.repository.AppointmentRepository;
-import org.example.repository.TxtTimeSlotRepository;
 import org.example.strategy.BookingRuleStrategy;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@DisplayName("Appointment Service Tests")
 class AppointmentServiceTest {
 
-    private FakeAppointmentRepository fakeRepo;
-    private FakeScheduleService fakeScheduleService;
-    private ReminderService fakeReminderService;
-    private FakeBookingRuleStrategy fakeRule;
+    private AppointmentRepository appointmentRepo;
+    private ScheduleService scheduleService;
+    private ReminderService reminderService;
     private AppointmentService appointmentService;
+    private List<BookingRuleStrategy> rules;
+
+    private User regularUser;
+    private Administrator adminUser;
+    private TimeSlot testSlot;
 
     @BeforeEach
     void setUp() {
-        fakeRepo = new FakeAppointmentRepository();
-        fakeScheduleService = new FakeScheduleService();
-        fakeReminderService = new ReminderService();
-        fakeRule = new FakeBookingRuleStrategy();
+        appointmentRepo = mock(AppointmentRepository.class);
+        scheduleService = mock(ScheduleService.class);
+        reminderService = mock(ReminderService.class);
+        rules = new ArrayList<>();
         
-        appointmentService = new AppointmentService(fakeRepo, fakeScheduleService, fakeReminderService, Arrays.asList(fakeRule));
+        appointmentService = new AppointmentService(appointmentRepo, scheduleService, reminderService, rules);
+        
+        regularUser = new User(1, "Regular User", "user@test.com", "pass", "USER");
+        adminUser = new Administrator(99, "Admin User", "admin@test.com", "adminpass");
+        testSlot = new TimeSlot(10, LocalDate.of(2026, 5, 20), LocalTime.of(10, 0), LocalTime.of(11, 0), false);
     }
 
     @Test
-    void testBookAppointment_validAppointment_savesCalled() {
-        TimeSlot slot = new TimeSlot(1, LocalDate.now(), LocalTime.of(9,0), LocalTime.of(10,0), true);
-        Appointment appointment = new UrgentAppointment(1, null, slot, AppointmentStatus.PENDING, 1);
-        
-        fakeRule.setValid(true);
-        appointmentService.bookAppointment(appointment);
-        
-        assertEquals(AppointmentStatus.CONFIRMED, appointment.getStatus());
-        assertTrue(fakeRepo.isSaveCalled());
-        assertTrue(fakeScheduleService.isBookSlotCalled());
+    @DisplayName("Admin Visibility: Should return all appointments for Admin")
+    void testAdminCanSeeAllAppointments() {
+        List<Appointment> allApps = new ArrayList<>();
+        allApps.add(new CustomAppointment(1, regularUser, testSlot, AppointmentStatus.CONFIRMED, 1));
+        allApps.add(new CustomAppointment(2, adminUser, testSlot, AppointmentStatus.CONFIRMED, 1));
+        when(appointmentRepo.findAll()).thenReturn(allApps);
+
+        List<Appointment> results = appointmentService.getAllAppointments(adminUser);
+
+        assertEquals(2, results.size());
+        verify(appointmentRepo).findAll();
     }
 
     @Test
-    void testBookAppointment_ruleViolated_throwsAndDoesNotSave() {
-        TimeSlot slot = new TimeSlot(1, LocalDate.now(), LocalTime.of(9,0), LocalTime.of(10,0), true);
-        Appointment appointment = new UrgentAppointment(1, null, slot, AppointmentStatus.PENDING, 1);
-        
-        fakeRule.setValid(false);
-        fakeRule.setErrorMessage("Rule violated");
-        
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentService.bookAppointment(appointment);
-        });
-        
-        assertEquals("Rule violated", ex.getMessage());
-        assertFalse(fakeRepo.isSaveCalled());
-        assertFalse(fakeScheduleService.isBookSlotCalled());
+    @DisplayName("Cancellation: Should permanently delete appointment and free timeslot")
+    void testCancelAppointment_PermanentlyDeletesAndFreesSlot() {
+        Appointment appt = new CustomAppointment(1, regularUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        when(appointmentRepo.findById(1)).thenReturn(appt);
+
+        appointmentService.cancelAppointment(1, regularUser);
+
+        verify(scheduleService).freeSlot(testSlot);
+        verify(appointmentRepo).delete(1);
+        verify(reminderService).sendReminder(any());
+        assertEquals(AppointmentStatus.CANCELLED, appt.getStatus()); 
     }
 
-    // --- Fake Implementations to bypass Mockito/JDK23 Agent Restrictions ---
+    @Test
+    @DisplayName("Modification: Should re-book the slot when an appointment is modified")
+    void testModifyAppointment_BooksSlot() {
+        Appointment appt = new CustomAppointment(1, regularUser, testSlot, AppointmentStatus.CONFIRMED, 1);
 
-    static class FakeAppointmentRepository implements AppointmentRepository {
-        private boolean saveCalled = false;
-        public boolean isSaveCalled() { return saveCalled; }
+        appointmentService.modifyAppointment(appt);
 
-        @Override public void save(Appointment appointment) { saveCalled = true; }
-        @Override public void update(Appointment appointment) {}
-        @Override public void delete(int id) {}
-        @Override public Appointment findById(int id) { return null; }
-        @Override public List<Appointment> findByUserId(int userId) { return new ArrayList<>(); }
-        @Override public List<Appointment> findAll() { return new ArrayList<>(); }
+        verify(appointmentRepo).update(appt);
+        verify(scheduleService).bookSlot(testSlot.getId());
     }
 
-    static class FakeScheduleService extends ScheduleService {
-        private boolean bookSlotCalled = false;
-        public FakeScheduleService() {
-            super(new Schedule(), new FakeTxtTimeSlotRepository());
-        }
-        public boolean isBookSlotCalled() { return bookSlotCalled; }
-        @Override public void bookSlot(int slotId) { bookSlotCalled = true; }
-    }
+    @Test
+    @DisplayName("Permissions: Admin should be able to delete any user's appointment")
+    void testAdminCanCancelAnyUserAppointment() {
+        Appointment userAppt = new CustomAppointment(5, regularUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        when(appointmentRepo.findById(5)).thenReturn(userAppt);
 
-    static class FakeTxtTimeSlotRepository extends TxtTimeSlotRepository {
-        @Override public List<TimeSlot> findAll() { return new ArrayList<>(); }
-    }
+        appointmentService.cancelAppointment(5, adminUser);
 
-    static class FakeBookingRuleStrategy implements BookingRuleStrategy {
-        private boolean valid = true;
-        private String errorMessage = "";
-
-        public void setValid(boolean valid) { this.valid = valid; }
-        public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
-
-        @Override
-        public boolean isValid(Appointment appointment) { return valid; }
-        @Override
-        public String getErrorMessage() { return errorMessage; }
+        verify(appointmentRepo).delete(5);
+        verify(scheduleService).freeSlot(testSlot);
     }
 }

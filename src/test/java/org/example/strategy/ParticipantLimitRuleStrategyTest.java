@@ -47,4 +47,20 @@ class ParticipantLimitRuleStrategyTest {
         Appointment appt = new GroupAppointment(1, null, dummySlot, AppointmentStatus.PENDING, 25);
         assertFalse(strategy.isValid(appt));
     }
+
+    @Test
+    void testIsValid_nullCases_returnsFalse() {
+        assertFalse(strategy.isValid(null));
+    }
+
+    @Test
+    void testIsValid_customWithin5_returnsTrue() {
+        Appointment appt = new org.example.domain.appointment.CustomAppointment(1, null, dummySlot, AppointmentStatus.PENDING, 5);
+        assertTrue(strategy.isValid(appt));
+    }
+
+    @Test
+    void testGetErrorMessage() {
+        assertEquals("The number of participants exceeds the maximum allowed for this appointment type.", strategy.getErrorMessage());
+    }
 }

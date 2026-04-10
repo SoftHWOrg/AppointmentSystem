@@ -42,4 +42,23 @@ class DurationRuleStrategyTest {
         Appointment appt = new GroupAppointment(1, null, slot, AppointmentStatus.PENDING, 5);
         assertTrue(strategy.isValid(appt));
     }
+
+    @Test
+    void testIsValid_nullCases_returnsFalse() {
+        assertFalse(strategy.isValid(null));
+        Appointment appt = new UrgentAppointment(1, null, null, AppointmentStatus.PENDING, 1);
+        assertFalse(strategy.isValid(appt));
+    }
+
+    @Test
+    void testIsValid_customWithin60min_returnsTrue() {
+        TimeSlot slot = new TimeSlot(1, LocalDate.now(), LocalTime.of(9,0), LocalTime.of(10,0), true);
+        Appointment appt = new org.example.domain.appointment.CustomAppointment(1, null, slot, AppointmentStatus.PENDING, 1);
+        assertTrue(strategy.isValid(appt));
+    }
+
+    @Test
+    void testGetErrorMessage() {
+        assertEquals("Appointment duration exceeds the maximum allowed time.", strategy.getErrorMessage());
+    }
 }

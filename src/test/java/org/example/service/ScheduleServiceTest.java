@@ -2,70 +2,63 @@ package org.example.service;
 
 import org.example.domain.entity.Schedule;
 import org.example.domain.valueobject.TimeSlot;
+import org.example.repository.TxtTimeSlotRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@DisplayName("Schedule Service Tests")
 class ScheduleServiceTest {
 
+    private TxtTimeSlotRepository slotRepo;
     private Schedule schedule;
+    private ScheduleService scheduleService;
 
     @BeforeEach
     void setUp() {
+        slotRepo = mock(TxtTimeSlotRepository.class);
         schedule = new Schedule();
-
-        TimeSlot availableSlot1 = new TimeSlot(1, LocalDate.now(), LocalTime.of(9, 0), LocalTime.of(10, 0), true);
-        TimeSlot availableSlot2 = new TimeSlot(2, LocalDate.now(), LocalTime.of(10, 0), LocalTime.of(11, 0), true);
-        TimeSlot bookedSlot = new TimeSlot(3, LocalDate.now(), LocalTime.of(11, 0), LocalTime.of(12, 0), false);
-
-        schedule.addSlot(availableSlot1);
-        schedule.addSlot(availableSlot2);
-        schedule.addSlot(bookedSlot);
+        when(slotRepo.findAll()).thenReturn(new ArrayList<>());
+        scheduleService = new ScheduleService(schedule, slotRepo);
     }
 
     @Test
-    void testGetAvailableSlots_returnsOnlyAvailable() {
-        List<TimeSlot> availableSlots = schedule.getAvailableSlots();
+    @DisplayName("Duplicate Prevention: Should not add a slot if same date/time already exists")
+    void testAddSlot_PreventsDuplicates() {
+        LocalDate date = LocalDate.of(2026, 1, 1);
+        LocalTime start = LocalTime.of(9, 0);
+        LocalTime end = LocalTime.of(10, 0);
+        
+        TimeSlot initial = new TimeSlot(1, date, start, end, true);
+        schedule.addSlot(initial); 
 
-        assertEquals(2, availableSlots.size());
+        TimeSlot duplicate = new TimeSlot(0, date, start, end, true);
 
-        for (TimeSlot slot : availableSlots) {
-            assertTrue(slot.isAvailable());
-        }
+        scheduleService.addSlot(duplicate);
+
+        assertEquals(1, schedule.getTimeSlots().size());
+        assertEquals(1, duplicate.getId());
+        verify(slotRepo, never()).save(any()); 
     }
 
     @Test
-    void testBookSlot_marksSlotUnavailable() {
-        schedule.markSlotAsBooked(1);
+    @DisplayName("Data Restoration: Should recover and restore missing slots when freed")
+    void testFreeSlot_HealsSchedule() {
+        TimeSlot orphanedSlot = new TimeSlot(101, LocalDate.of(2027, 2, 2), LocalTime.of(15,0), LocalTime.of(16,0), false);
 
-        TimeSlot slot = schedule.getTimeSlots().stream()
-                .filter(s -> s.getId() == 1)
-                .findFirst()
-                .orElse(null);
+        scheduleService.freeSlot(orphanedSlot);
 
-        assertNotNull(slot);
-        assertFalse(slot.isAvailable());
-    }
-
-    @Test
-    void testFreeSlot_marksSlotAvailable() {
-        schedule.markSlotAsBooked(1);
-        assertFalse(schedule.getTimeSlots().stream()
-                .filter(s -> s.getId() == 1).findFirst().get().isAvailable());
-
-        schedule.freeSlot(1);
-
-        TimeSlot slot = schedule.getTimeSlots().stream()
-                .filter(s -> s.getId() == 1)
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(slot);
-        assertTrue(slot.isAvailable());
+        boolean restored = schedule.getTimeSlots().stream()
+                .anyMatch(s -> s.getDate().equals(orphanedSlot.getDate()) && s.isAvailable());
+        
+        assertTrue(restored);
+        verify(slotRepo, times(1)).save(any()); 
     }
 }

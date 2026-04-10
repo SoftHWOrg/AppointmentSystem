@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TxtUserRepository implements UserRepository {
 
-    private static final String FILE_PATH = "C:\\Users\\ibrah\\Downloads\\AppointmentSystem-IbrahimBranch\\AppointmentSystem-IbrahimBranch\\data\\users.txt";
+    private static final String FILE_PATH = "data/users.txt";
     private static final String DELIMITER = "|";
     private static final String DELIMITER_REGEX = "\\|";
 

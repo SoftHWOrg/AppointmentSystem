@@ -29,6 +29,12 @@ public class CustomAppointmentPanel extends JPanel {
     private JTextField endTimeField;
     private JSpinner participantsSpinner;
     private JLabel statusLabel;
+    private Appointment editingAppointment;
+    private JLabel titleLabel;
+    private JButton submitButton;
+    private JList<String> slotList;
+    private DefaultListModel<String> slotModel;
+    private java.util.List<TimeSlot> availableSlots;
 
     public CustomAppointmentPanel(MainFrame mainFrame,
                                   AuthService authService,
@@ -49,23 +55,51 @@ public class CustomAppointmentPanel extends JPanel {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(new Color(240, 244, 248));
 
-        JLabel title = new JLabel("Book Custom Appointment");
-        title.setFont(new Font("SansSerif", Font.BOLD, 18));
-        title.setForeground(new Color(25, 80, 170));
-        topBar.add(title, BorderLayout.WEST);
+        titleLabel = new JLabel("Book Appointment");
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(25, 80, 170));
+        topBar.add(titleLabel, BorderLayout.WEST);
 
         JButton backButton = new JButton("← Back");
         styleButton(backButton, new Color(100, 100, 100));
-        backButton.addActionListener(e -> mainFrame.showPanel(MainFrame.APPOINTMENT_PANEL));
+        backButton.addActionListener(e -> {
+            if (editingAppointment != null) {
+                mainFrame.showPanel(MainFrame.MY_APPTS_PANEL);
+            } else {
+                mainFrame.showPanel(MainFrame.DASHBOARD_PANEL);
+            }
+        });
         topBar.add(backButton, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
+        // LEFT: Slot list
+        slotModel = new DefaultListModel<>();
+        slotList = new JList<>(slotModel);
+        slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        slotList.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        slotList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                handleSlotSelection();
+            }
+        });
+        
+        JScrollPane scrollPane = new JScrollPane(slotList);
+        scrollPane.setPreferredSize(new Dimension(280, 0));
+        scrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(180, 200, 230)),
+                "Available Slots",
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font("SansSerif", Font.BOLD, 11),
+                new Color(25, 80, 170)));
+        add(scrollPane, BorderLayout.WEST);
+
+        // CENTER: Form
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
         formPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(
                         BorderFactory.createLineBorder(new Color(180, 200, 230)),
-                        "Create Your Time Slot",
+                        "Appointment Details",
                         TitledBorder.LEFT, TitledBorder.TOP,
                         new Font("SansSerif", Font.BOLD, 12),
                         new Color(25, 80, 170)),
@@ -104,13 +138,13 @@ public class CustomAppointmentPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(participantsSpinner, gbc);
 
-        JButton bookButton = new JButton("Create & Book");
-        styleButton(bookButton, new Color(25, 140, 60));
-        bookButton.addActionListener(e -> handleCustomBooking());
+        submitButton = new JButton("Book Appointment");
+        styleButton(submitButton, new Color(25, 140, 60));
+        submitButton.addActionListener(e -> handleBooking());
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(bookButton, gbc);
+        formPanel.add(submitButton, gbc);
 
         add(formPanel, BorderLayout.CENTER);
 
@@ -120,36 +154,97 @@ public class CustomAppointmentPanel extends JPanel {
         add(statusLabel, BorderLayout.SOUTH);
     }
 
+    private void handleSlotSelection() {
+        int index = slotList.getSelectedIndex();
+        if (index >= 0 && availableSlots != null && index < availableSlots.size()) {
+            TimeSlot s = availableSlots.get(index);
+            dateField.setText(s.getDate().toString());
+            startTimeField.setText(s.getStartTime().toString());
+            endTimeField.setText(s.getEndTime().toString());
+        }
+    }
+
+    public void loadAvailableSlots() {
+        slotModel.clear();
+        availableSlots = scheduleService.getAvailableSlots();
+        for (TimeSlot s : availableSlots) {
+            slotModel.addElement(String.format("%s  |  %s - %s", s.getDate(), s.getStartTime(), s.getEndTime()));
+        }
+    }
+
     public void clearFields() {
+        editingAppointment = null;
+        titleLabel.setText("Book Appointment");
+        submitButton.setText("Book Appointment");
+        submitButton.setBackground(new Color(25, 140, 60));
         dateField.setText("");
         startTimeField.setText("");
         endTimeField.setText("");
         participantsSpinner.setValue(1);
         statusLabel.setText(" ");
+        loadAvailableSlots();
     }
 
-    private void handleCustomBooking() {
+    public void setEditAppointment(Appointment a) {
+        editingAppointment = a;
+        titleLabel.setText("Edit Appointment #" + a.getId());
+        submitButton.setText("Update Appointment");
+        submitButton.setBackground(new Color(25, 100, 200));
+        dateField.setText(a.getTimeSlot().getDate().toString());
+        startTimeField.setText(a.getTimeSlot().getStartTime().toString());
+        endTimeField.setText(a.getTimeSlot().getEndTime().toString());
+        participantsSpinner.setValue(a.getParticipants());
+        statusLabel.setText("Modifying existing reservation.");
+    }
+
+    private void handleBooking() {
         try {
-            LocalDate date = LocalDate.parse(dateField.getText().trim());
+            LocalDate date  = LocalDate.parse(dateField.getText().trim());
             LocalTime start = LocalTime.parse(startTimeField.getText().trim());
-            LocalTime end = LocalTime.parse(endTimeField.getText().trim());
+            LocalTime end   = LocalTime.parse(endTimeField.getText().trim());
             int participants = (int) participantsSpinner.getValue();
 
-            TimeSlot slot = new TimeSlot(0, date, start, end, true);
-            scheduleService.addSlot(slot);
+            if (editingAppointment == null) {
+                // Creation flow
+                TimeSlot slot;
+                int selectedIndex = slotList.getSelectedIndex();
+                
+                if (selectedIndex >= 0 && availableSlots.get(selectedIndex).getDate().equals(date) &&
+                    availableSlots.get(selectedIndex).getStartTime().equals(start)) {
+                    // Reuse selected slot
+                    slot = availableSlots.get(selectedIndex);
+                } else {
+                    // Create new/custom slot
+                    slot = new TimeSlot(0, date, start, end, true);
+                    scheduleService.addSlot(slot);
+                }
 
-            User currentUser = authService.getCurrentUser();
-            Appointment appointment = new CustomAppointment(0, currentUser, slot, AppointmentStatus.PENDING, participants);
-
-            appointmentService.bookAppointment(appointment);
-            setStatus("Custom appointment created and booked successfully!", true);
-
+                Appointment appointment = new CustomAppointment(0, authService.getCurrentUser(), slot, AppointmentStatus.PENDING, participants);
+                appointmentService.bookAppointment(appointment);
+                setStatus("Appointment booked successfully!", true);
+                loadAvailableSlots();
+            } else {
+                // Update flow
+                TimeSlot slot = editingAppointment.getTimeSlot();
+                if (!slot.getDate().equals(date) || !slot.getStartTime().equals(start) || !slot.getEndTime().equals(end)) {
+                    // Time changed, need to free old and book new/existing
+                    scheduleService.freeSlot(slot);
+                    TimeSlot newSlot = new TimeSlot(0, date, start, end, true);
+                    scheduleService.addSlot(newSlot);
+                    editingAppointment.setTimeSlot(newSlot);
+                }
+                
+                editingAppointment.setParticipants(participants);
+                appointmentService.modifyAppointment(editingAppointment);
+                setStatus("Appointment updated successfully!", true);
+                loadAvailableSlots();
+            }
         } catch (DateTimeParseException ex) {
-            setStatus("Please use correct formats (YYYY-MM-DD for date, HH:MM for time).", false);
+            setStatus("Format error: YYYY-MM-DD and HH:MM.", false);
         } catch (IllegalArgumentException ex) {
             setStatus(ex.getMessage(), false);
         } catch (Exception ex) {
-            setStatus("An unexpected error occurred.", false);
+            setStatus("Error: " + ex.getMessage(), false);
         }
     }
 

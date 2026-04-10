@@ -98,24 +98,14 @@ public class AppointmentPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(participantsSpinner, gbc);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        buttonPanel.setBackground(Color.WHITE);
-
         JButton bookButton = new JButton("Book Appointment");
         styleButton(bookButton, new Color(25, 140, 60));
         bookButton.addActionListener(e -> handleBooking(AppointmentType.DEFAULT));
-        
-        JButton customBookButton = new JButton("Book Custom Appointment");
-        styleButton(customBookButton, new Color(25, 80, 170));
-        customBookButton.addActionListener(e -> mainFrame.showPanel(MainFrame.CUSTOM_APPOINTMENT_PANEL));
-        
-        buttonPanel.add(bookButton);
-        buttonPanel.add(customBookButton);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(buttonPanel, gbc);
+        formPanel.add(bookButton, gbc);
 
         add(formPanel, BorderLayout.CENTER);
 
@@ -125,7 +115,6 @@ public class AppointmentPanel extends JPanel {
         add(statusLabel, BorderLayout.SOUTH);
     }
 
-    
     public void loadAvailableSlots() {
         slotModel.clear();
         availableSlots = scheduleService.getAvailableSlots();

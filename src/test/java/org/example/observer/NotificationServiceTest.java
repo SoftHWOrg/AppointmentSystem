@@ -26,6 +26,18 @@ class NotificationServiceTest {
     
     @Test
     void testSendReminder_notifiesAllObservers() {
+<<<<<<< Updated upstream
+=======
+        reminderService.registerObserver(mockObserver);
+        
+        User user = new User(1, "Test", "test@test.com", "pass", "USER");
+        TimeSlot slot = new TimeSlot(1, LocalDate.now(), LocalTime.of(10, 0), LocalTime.of(11, 0), false);
+        Appointment mockAppointment = Mockito.mock(Appointment.class);
+        when(mockAppointment.getUser()).thenReturn(user);
+        when(mockAppointment.getTimeSlot()).thenReturn(slot);
+        when(mockAppointment.getStatus()).thenReturn(AppointmentStatus.CONFIRMED);
+        when(mockAppointment.getId()).thenReturn(1);
+>>>>>>> Stashed changes
 
     }
 

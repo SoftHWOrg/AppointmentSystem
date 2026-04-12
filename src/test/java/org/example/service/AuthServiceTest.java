@@ -90,4 +90,20 @@ class AuthServiceTest {
         assertFalse(authService.isLoggedIn());
         assertNull(authService.getCurrentUser());
     }
+
+    @Test
+    void testIsAdmin_checksRoleCorrectly() {
+        User admin = new User(1, "A", "a@e.com", "p", "ADMIN");
+        stubRepo.setUserToReturn(admin);
+        authService.login("a@e.com", "p");
+        assertTrue(authService.isAdmin());
+
+        authService.logout();
+
+        User user = new User(2, "U", "u@e.com", "p", "USER");
+        stubRepo.setUserToReturn(user);
+        authService.login("u@e.com", "p");
+        assertFalse(authService.isAdmin());
+    }
 }
+

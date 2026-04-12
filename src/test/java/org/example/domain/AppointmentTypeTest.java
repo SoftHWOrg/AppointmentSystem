@@ -34,18 +34,37 @@ class AppointmentTypeTest {
     }
 
     @Test
-    void testVirtualAppointment_properties() {
-        VirtualAppointment appt = new VirtualAppointment(1, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
-        assertEquals(AppointmentType.VIRTUAL, appt.getType());
+    void testAssessmentAppointment_properties() {
+        AssessmentAppointment appt = new AssessmentAppointment(1, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        assertEquals(AppointmentType.ASSESSMENT, appt.getType());
+        assertEquals(60, appt.getMaxDuration());
+        assertEquals(1, appt.getMaxParticipants());
+    }
+
+    @Test
+    void testInPersonAppointment_properties() {
+        InPersonAppointment appt = new InPersonAppointment(1, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        assertEquals(AppointmentType.IN_PERSON, appt.getType());
+        assertEquals(60, appt.getMaxDuration());
+        assertEquals(3, appt.getMaxParticipants());
+    }
+
+    @Test
+    void testIndividualAppointment_properties() {
+        IndividualAppointment appt = new IndividualAppointment(1, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        assertEquals(AppointmentType.INDIVIDUAL, appt.getType());
+        assertEquals(30, appt.getMaxDuration());
+        assertEquals(1, appt.getMaxParticipants());
+    }
+
+    @Test
+    void testDefaultAppointment_properties() {
+        DefaultAppointment appt = new DefaultAppointment(1, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        assertEquals(AppointmentType.DEFAULT, appt.getType());
         assertEquals(60, appt.getMaxDuration());
         assertEquals(5, appt.getMaxParticipants());
     }
 
-    @Test
-    void testFollowUpAppointment_properties() {
-        FollowUpAppointment appt = new FollowUpAppointment(1, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
-        assertEquals(AppointmentType.FOLLOW_UP, appt.getType());
-        assertEquals(30, appt.getMaxDuration());
-        assertEquals(1, appt.getMaxParticipants());
-    }
+
 }
+

@@ -1,1 +1,6 @@
 
+1|1|Test User|test@email.com|pass|USER|1|2026-04-12|09:00|10:00|true|URGENT|CONFIRMED|1
+2|1|Test User|test@email.com|pass|USER|1|2026-04-12|09:00|10:00|true|URGENT|CANCELLED|1
+3|1|Test User|test@email.com|pass|USER|1|2026-04-12|09:00|10:00|true|URGENT|CONFIRMED|1
+4|2|Regular User|user@email.com|user123|USER|5|2026-04-12|22:30|23:30|true|CUSTOM|CONFIRMED|3
+5|2|Regular User|user@email.com|user123|USER|3|2026-04-10|09:00|09:30|true|FOLLOW_UP|CONFIRMED|1

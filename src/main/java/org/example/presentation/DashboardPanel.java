@@ -79,7 +79,7 @@ public class DashboardPanel extends JPanel {
 
         boolean isAdmin = authService.isAdmin();
         bookButton.setVisible(!isAdmin);
-        myApptsButton.setVisible(true); // Users see their appts, Admins see theirs (usually empty)
+        myApptsButton.setVisible(!isAdmin);
         adminButton.setVisible(isAdmin);
 
         revalidate();

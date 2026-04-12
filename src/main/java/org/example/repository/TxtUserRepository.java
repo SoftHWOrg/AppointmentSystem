@@ -9,39 +9,45 @@ import java.util.List;
 
 public class TxtUserRepository implements UserRepository {
 
-    private static final String FILE_PATH = "data/users.txt";
+    private final String filePath;
+    private static final String DEFAULT_FILE_PATH = "data/users.txt";
     private static final String DELIMITER = "|";
     private static final String DELIMITER_REGEX = "\\|";
 
     public TxtUserRepository() {
+        this(DEFAULT_FILE_PATH);
+    }
+
+    public TxtUserRepository(String filePath) {
+        this.filePath = filePath;
         ensureFileExists();
     }
 
     private void ensureFileExists() {
         try {
-            Path path = Paths.get(FILE_PATH);
+            Path path = Paths.get(filePath);
             if (!Files.exists(path)) {
-                Files.createDirectories(path.getParent());
+                if (path.getParent() != null) {
+                    Files.createDirectories(path.getParent());
+                }
                 Files.createFile(path);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Cannot initialise users file: " + FILE_PATH, e);
+            throw new RuntimeException("Cannot initialise users file: " + filePath, e);
         }
     }
 
     private List<String> readAllLines() {
         try {
-            return Files.readAllLines(Paths.get(FILE_PATH));
+            return Files.readAllLines(Paths.get(filePath));
         } catch (IOException e) {
             throw new RuntimeException("Error reading users file", e);
         }
     }
 
     private void writeAllLines(List<String> lines) {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_PATH, false))) {
-            for (String line : lines) {
-                pw.println(line);
-            }
+        try {
+            Files.write(Paths.get(filePath), lines, java.nio.charset.StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Error writing users file", e);
         }

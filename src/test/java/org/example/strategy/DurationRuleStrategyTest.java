@@ -51,9 +51,9 @@ class DurationRuleStrategyTest {
     }
 
     @Test
-    void testIsValid_customWithin60min_returnsTrue() {
+    void testIsValid_defaultWithin60min_returnsTrue() {
         TimeSlot slot = new TimeSlot(1, LocalDate.now(), LocalTime.of(9,0), LocalTime.of(10,0), true);
-        Appointment appt = new org.example.domain.appointment.CustomAppointment(1, null, slot, AppointmentStatus.PENDING, 1);
+        Appointment appt = new org.example.domain.appointment.DefaultAppointment(1, null, slot, AppointmentStatus.PENDING, 1);
         assertTrue(strategy.isValid(appt));
     }
 

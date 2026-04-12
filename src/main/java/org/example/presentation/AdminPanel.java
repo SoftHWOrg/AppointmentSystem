@@ -75,6 +75,10 @@ public class AdminPanel extends JPanel {
         styleButton(refreshButton, new Color(25, 100, 200));
         refreshButton.addActionListener(e -> loadAllAppointments());
 
+        JButton editButton = new JButton("Edit Selected");
+        styleButton(editButton, new Color(200, 150, 20));
+        editButton.addActionListener(e -> handleAdminEdit());
+
         JButton cancelButton = new JButton("Cancel Selected");
         styleButton(cancelButton, new Color(200, 40, 40));
         cancelButton.addActionListener(e -> handleAdminCancel());
@@ -87,6 +91,7 @@ public class AdminPanel extends JPanel {
         statusLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
         bottomBar.add(refreshButton);
+        bottomBar.add(editButton);
         bottomBar.add(cancelButton);
         bottomBar.add(addSlotButton);
         bottomBar.add(statusLabel);
@@ -117,6 +122,27 @@ public class AdminPanel extends JPanel {
         } catch (Exception ex) {
             ex.printStackTrace();
             setStatus("Error: " + ex.getMessage(), false);
+        }
+    }
+
+    private void handleAdminEdit() {
+        int selectedRow = allAppointmentsTable.getSelectedRow();
+        if (selectedRow < 0) {
+            setStatus("Please select an appointment to edit.", false);
+            return;
+        }
+
+        int appointmentId = (int) tableModel.getValueAt(selectedRow, 0);
+        try {
+            List<Appointment> apps = appointmentService.getAllAppointments(authService.getCurrentUser());
+            Appointment target = apps.stream().filter(a -> a.getId() == appointmentId).findFirst().orElse(null);
+
+            if (target != null) {
+                mainFrame.getEditAppointmentPanel().setEditAppointment(target);
+                mainFrame.showPanel(MainFrame.EDIT_APPOINTMENT_PANEL);
+            }
+        } catch (Exception ex) {
+            setStatus(ex.getMessage(), false);
         }
     }
 
@@ -165,7 +191,7 @@ public class AdminPanel extends JPanel {
                 LocalTime start = LocalTime.parse(startField.getText().trim());
                 LocalTime end = LocalTime.parse(endField.getText().trim());
 
-                TimeSlot slot = new TimeSlot(0, date, start, end, true); // ID assigned by repository
+                TimeSlot slot = new TimeSlot(0, date, start, end, true);
                 scheduleService.addSlot(slot);
                 setStatus("Time slot added: " + date + " " + start + "–" + end, true);
             } catch (DateTimeParseException ex) {

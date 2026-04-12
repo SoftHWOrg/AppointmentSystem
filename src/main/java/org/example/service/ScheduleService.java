@@ -15,13 +15,28 @@ public class ScheduleService {
         this.schedule = schedule;
         this.slotRepository = slotRepository;
 
-        for (TimeSlot slot : slotRepository.findAll()) {
-            schedule.addSlot(slot);
-        }
+        syncWithRepository();
     }
 
     public List<TimeSlot> getAvailableSlots() {
+        syncWithRepository();
         return schedule.getAvailableSlots();
+    }
+
+    private void syncWithRepository() {
+        for (TimeSlot slot : slotRepository.findAll()) {
+            boolean exists = false;
+            for (TimeSlot s : schedule.getTimeSlots()) {
+                if (s.getId() == slot.getId()) {
+                    s.setAvailable(slot.isAvailable());
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                schedule.addSlot(slot);
+            }
+        }
     }
 
     public void addSlot(TimeSlot slot) {
@@ -31,7 +46,6 @@ public class ScheduleService {
             throw new IllegalArgumentException("End time must be after start time");
         }
 
-        // Prevent duplicates
         for (TimeSlot existing : schedule.getTimeSlots()) {
             if (existing.getDate().equals(slot.getDate()) &&
                     existing.getStartTime().equals(slot.getStartTime()) &&
@@ -41,8 +55,8 @@ public class ScheduleService {
             }
         }
 
-        slotRepository.save(slot); // assigns the real ID and writes to file
-        schedule.addSlot(slot); // slot now has the correct ID from the repo
+        slotRepository.save(slot); 
+        schedule.addSlot(slot); 
     }
 
     public void bookSlot(int slotId) {

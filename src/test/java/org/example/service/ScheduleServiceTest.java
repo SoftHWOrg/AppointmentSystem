@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -61,4 +62,79 @@ class ScheduleServiceTest {
         assertTrue(restored);
         verify(slotRepo, times(1)).save(any()); 
     }
+
+    @Test
+    @DisplayName("Booking: Should mark slot as unavailable and update repo")
+    void testBookSlot() {
+        TimeSlot slot = new TimeSlot(1, LocalDate.of(2026, 1, 1), LocalTime.of(9, 0), LocalTime.of(10, 0), true);
+        schedule.addSlot(slot);
+
+        scheduleService.bookSlot(1);
+
+        assertFalse(slot.isAvailable());
+        verify(slotRepo).update(slot);
+    }
+
+    @Test
+    @DisplayName("Validation: Should fail to add slot if end time is before start time")
+    void testAddSlot_ValidationFailure() {
+        TimeSlot invalidSlot = new TimeSlot(0, LocalDate.of(2026, 1, 1), LocalTime.of(10, 0), LocalTime.of(9, 0), true);
+        
+        assertThrows(IllegalArgumentException.class, () -> scheduleService.addSlot(invalidSlot));
+    }
+
+    @Test
+    @DisplayName("Creation: Should save new slot and add to schedule")
+    void testAddSlot_Success() {
+        TimeSlot newSlot = new TimeSlot(0, LocalDate.of(2026, 2, 1), LocalTime.of(13, 0), LocalTime.of(14, 0), true);
+        
+        scheduleService.addSlot(newSlot);
+        
+        assertTrue(schedule.getTimeSlots().contains(newSlot));
+        verify(slotRepo).save(newSlot);
+    }
+
+    @Test
+    @DisplayName("Retrieval: Should combine repository slots and local schedule slots")
+    void testGetAvailableSlots() {
+        TimeSlot repoSlot = new TimeSlot(1, LocalDate.now(), LocalTime.of(8,0), LocalTime.of(9,0), true);
+        when(slotRepo.findAll()).thenReturn(java.util.Collections.singletonList(repoSlot));
+        
+        List<TimeSlot> available = scheduleService.getAvailableSlots();
+        
+        assertFalse(available.isEmpty());
+        assertTrue(available.stream().anyMatch(s -> s.getId() == 1));
+    }
+    @Test
+    @DisplayName("Freeing: Should free slot by ID and update repository")
+    void testFreeSlotById() {
+        TimeSlot slot = new TimeSlot(1, LocalDate.of(2026, 1, 1), LocalTime.of(9, 0), LocalTime.of(10, 0), false);
+        schedule.addSlot(slot);
+
+        scheduleService.freeSlot(1);
+
+        assertTrue(slot.isAvailable());
+        verify(slotRepo).update(slot);
+    }
+
+    @Test
+    @DisplayName("Null Safety: Should handle null inputs gracefully")
+    void testNullChecks() {
+        assertThrows(IllegalArgumentException.class, () -> scheduleService.addSlot(null));
+        assertDoesNotThrow(() -> scheduleService.freeSlot(null));
+    }
+
+    @Test
+    @DisplayName("Freeing Existing: Should free existing slot in schedule")
+    void testFreeExistingSlot() {
+        TimeSlot slot = new TimeSlot(1, LocalDate.of(2026, 1, 1), LocalTime.of(9, 0), LocalTime.of(10, 0), false);
+        schedule.addSlot(slot);
+        
+        scheduleService.freeSlot(slot); // ID match
+        
+        assertTrue(slot.isAvailable());
+        verify(slotRepo).update(slot);
+    }
 }
+
+

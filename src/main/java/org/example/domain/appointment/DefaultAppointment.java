@@ -13,8 +13,8 @@ public class DefaultAppointment extends Appointment {
     }
 
     @Override
-    public int getMaxDuration() { return Integer.MAX_VALUE; }
+    public int getMaxDuration() { return 60; }
 
     @Override
-    public int getMaxParticipants() { return Integer.MAX_VALUE; }
+    public int getMaxParticipants() { return 5; }
 }

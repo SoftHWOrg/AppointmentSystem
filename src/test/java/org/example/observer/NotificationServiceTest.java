@@ -36,6 +36,8 @@ class NotificationServiceTest {
         Appointment mockAppointment = Mockito.mock(Appointment.class);
         when(mockAppointment.getUser()).thenReturn(user);
         when(mockAppointment.getTimeSlot()).thenReturn(slot);
+        when(mockAppointment.getType()).thenReturn(org.example.domain.enums.AppointmentType.URGENT);
+        when(mockAppointment.getStatus()).thenReturn(org.example.domain.enums.AppointmentStatus.CONFIRMED);
 
         reminderService.sendReminder(mockAppointment);
         verify(mockObserver, times(1)).notify(eq(user), anyString());
@@ -56,11 +58,9 @@ class NotificationServiceTest {
     void testSendReminder_nullCases() {
         reminderService.registerObserver(mockObserver);
         
-        // Null appointment
         reminderService.sendReminder(null);
         verify(mockObserver, never()).notify(any(User.class), anyString());
         
-        // Null user
         Appointment mockAppointment = Mockito.mock(Appointment.class);
         when(mockAppointment.getUser()).thenReturn(null);
         reminderService.sendReminder(mockAppointment);
@@ -70,7 +70,7 @@ class NotificationServiceTest {
     @Test
     void testDoubleRegistration() {
         reminderService.registerObserver(mockObserver);
-        reminderService.registerObserver(mockObserver); // Should not duplicate
+        reminderService.registerObserver(mockObserver); 
         
         User user = new User(1, "Test", "test@test.com", "pass", "USER");
         reminderService.notifyAllObservers(user, "Hello");

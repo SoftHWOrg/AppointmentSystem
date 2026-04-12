@@ -54,8 +54,8 @@ class ParticipantLimitRuleStrategyTest {
     }
 
     @Test
-    void testIsValid_customWithin5_returnsTrue() {
-        Appointment appt = new org.example.domain.appointment.CustomAppointment(1, null, dummySlot, AppointmentStatus.PENDING, 5);
+    void testIsValid_defaultWithin5_returnsTrue() {
+        Appointment appt = new org.example.domain.appointment.DefaultAppointment(1, null, dummySlot, AppointmentStatus.PENDING, 5);
         assertTrue(strategy.isValid(appt));
     }
 

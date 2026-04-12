@@ -56,7 +56,7 @@ public class AppointmentPanel extends JPanel {
         title.setFont(new Font("SansSerif", Font.BOLD, 18));
         title.setForeground(new Color(25, 80, 170));
         topBar.add(title, BorderLayout.WEST);
-
+        
         JButton backButton = new JButton("← Back");
         styleButton(backButton, new Color(100, 100, 100));
         backButton.addActionListener(e -> mainFrame.showPanel(MainFrame.DASHBOARD_PANEL));
@@ -93,7 +93,6 @@ public class AppointmentPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Appointment Type row — button instead of combo box
         gbc.gridx = 0; gbc.gridy = 0;
         formPanel.add(new JLabel("Appointment Type:"), gbc);
         typeButton = new JButton("Choose Type...");
@@ -115,13 +114,27 @@ public class AppointmentPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(participantsSpinner, gbc);
 
-        JButton bookButton = new JButton("Book Appointment");
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        actionsPanel.setBackground(Color.WHITE);
+
+        JButton bookButton = new JButton("Book Selection");
         styleButton(bookButton, new Color(25, 140, 60));
         bookButton.addActionListener(e -> handleBooking());
+
+        JButton customButton = new JButton("Custom Appointment");
+        styleButton(customButton, new Color(20, 120, 100));
+        customButton.addActionListener(e -> {
+            mainFrame.getEditAppointmentPanel().clearFields();
+            mainFrame.showPanel(MainFrame.EDIT_APPOINTMENT_PANEL);
+        });
+
+        actionsPanel.add(bookButton);
+        actionsPanel.add(customButton);
+
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(bookButton, gbc);
+        formPanel.add(actionsPanel, gbc);
 
         add(formPanel, BorderLayout.CENTER);
 
@@ -131,7 +144,6 @@ public class AppointmentPanel extends JPanel {
         add(statusLabel, BorderLayout.SOUTH);
     }
 
-    /** Opens a dialog listing all available appointment types for the user to pick. */
     private void openTypeDialog() {
         AppointmentType[] types = AppointmentType.values();
         String[] typeNames = new String[types.length];
@@ -203,7 +215,6 @@ public class AppointmentPanel extends JPanel {
             System.out.println("Processing booking for " + selectedType + "...");
             appointmentService.bookAppointment(appointment);
             setStatus("Appointment booked successfully!", true);
-            // Reset type selection after a successful booking
             selectedType = null;
             typeButton.setText("Choose Type...");
             typeButton.setForeground(new Color(25, 80, 170));
@@ -225,6 +236,7 @@ public class AppointmentPanel extends JPanel {
             case IN_PERSON  -> new InPersonAppointment(id, user, slot, status, participants);
             case INDIVIDUAL -> new IndividualAppointment(id, user, slot, status, participants);
             case GROUP      -> new GroupAppointment(id, user, slot, status, participants);
+            case DEFAULT    -> new DefaultAppointment(id, user, slot, status, participants);
         };
     }
 

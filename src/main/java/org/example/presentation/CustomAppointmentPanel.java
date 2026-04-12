@@ -1,6 +1,6 @@
 package org.example.presentation;
 
-import org.example.domain.appointment.CustomAppointment;
+import org.example.domain.appointment.DefaultAppointment;
 import org.example.domain.entity.Appointment;
 import org.example.domain.entity.User;
 import org.example.domain.enums.AppointmentStatus;
@@ -64,7 +64,11 @@ public class CustomAppointmentPanel extends JPanel {
         styleButton(backButton, new Color(100, 100, 100));
         backButton.addActionListener(e -> {
             if (editingAppointment != null) {
-                mainFrame.showPanel(MainFrame.MY_APPTS_PANEL);
+                if (authService.isAdmin()) {
+                    mainFrame.showPanel(MainFrame.ADMIN_PANEL);
+                } else {
+                    mainFrame.showPanel(MainFrame.MY_APPTS_PANEL);
+                }
             } else {
                 mainFrame.showPanel(MainFrame.DASHBOARD_PANEL);
             }
@@ -72,7 +76,6 @@ public class CustomAppointmentPanel extends JPanel {
         topBar.add(backButton, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
-        // LEFT: Slot list
         slotModel = new DefaultListModel<>();
         slotList = new JList<>(slotModel);
         slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -93,7 +96,6 @@ public class CustomAppointmentPanel extends JPanel {
                 new Color(25, 80, 170)));
         add(scrollPane, BorderLayout.WEST);
 
-        // CENTER: Form
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
         formPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -205,29 +207,24 @@ public class CustomAppointmentPanel extends JPanel {
             int participants = (int) participantsSpinner.getValue();
 
             if (editingAppointment == null) {
-                // Creation flow
                 TimeSlot slot;
                 int selectedIndex = slotList.getSelectedIndex();
                 
                 if (selectedIndex >= 0 && availableSlots.get(selectedIndex).getDate().equals(date) &&
                     availableSlots.get(selectedIndex).getStartTime().equals(start)) {
-                    // Reuse selected slot
                     slot = availableSlots.get(selectedIndex);
                 } else {
-                    // Create new/custom slot
                     slot = new TimeSlot(0, date, start, end, true);
                     scheduleService.addSlot(slot);
                 }
 
-                Appointment appointment = new CustomAppointment(0, authService.getCurrentUser(), slot, AppointmentStatus.PENDING, participants);
+                Appointment appointment = new DefaultAppointment(0, authService.getCurrentUser(), slot, AppointmentStatus.CONFIRMED, participants);
                 appointmentService.bookAppointment(appointment);
                 setStatus("Appointment booked successfully!", true);
                 loadAvailableSlots();
             } else {
-                // Update flow
                 TimeSlot slot = editingAppointment.getTimeSlot();
                 if (!slot.getDate().equals(date) || !slot.getStartTime().equals(start) || !slot.getEndTime().equals(end)) {
-                    // Time changed, need to free old and book new/existing
                     scheduleService.freeSlot(slot);
                     TimeSlot newSlot = new TimeSlot(0, date, start, end, true);
                     scheduleService.addSlot(newSlot);

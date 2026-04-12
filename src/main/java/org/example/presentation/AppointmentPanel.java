@@ -27,6 +27,8 @@ public class AppointmentPanel extends JPanel {
     private DefaultListModel<String> slotModel;
     private JList<String> slotList;
     private List<TimeSlot> availableSlots;
+    private AppointmentType selectedType = null;
+    private JButton typeButton;
     private JSpinner participantsSpinner;
     private JLabel statusLabel;
 
@@ -91,7 +93,22 @@ public class AppointmentPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Appointment Type row — button instead of combo box
         gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Appointment Type:"), gbc);
+        typeButton = new JButton("Choose Type...");
+        typeButton.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        typeButton.setBackground(new Color(230, 240, 255));
+        typeButton.setForeground(new Color(25, 80, 170));
+        typeButton.setFocusPainted(false);
+        typeButton.setBorderPainted(true);
+        typeButton.setOpaque(true);
+        typeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        typeButton.addActionListener(e -> openTypeDialog());
+        gbc.gridx = 1;
+        formPanel.add(typeButton, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
         formPanel.add(new JLabel("Participants:"), gbc);
         participantsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
         participantsSpinner.setFont(new Font("SansSerif", Font.PLAIN, 13));
@@ -100,8 +117,7 @@ public class AppointmentPanel extends JPanel {
 
         JButton bookButton = new JButton("Book Appointment");
         styleButton(bookButton, new Color(25, 140, 60));
-        bookButton.addActionListener(e -> handleBooking(AppointmentType.DEFAULT));
-
+        bookButton.addActionListener(e -> handleBooking());
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -113,6 +129,38 @@ public class AppointmentPanel extends JPanel {
         statusLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         statusLabel.setBorder(new EmptyBorder(5, 0, 5, 0));
         add(statusLabel, BorderLayout.SOUTH);
+    }
+
+    /** Opens a dialog listing all available appointment types for the user to pick. */
+    private void openTypeDialog() {
+        AppointmentType[] types = AppointmentType.values();
+        String[] typeNames = new String[types.length];
+        for (int i = 0; i < types.length; i++) {
+            typeNames[i] = types[i].name().replace("_", " ");
+        }
+
+        JList<String> list = new JList<>(typeNames);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        list.setFixedCellHeight(30);
+        if (selectedType != null) {
+            for (int i = 0; i < types.length; i++) {
+                if (types[i] == selectedType) { list.setSelectedIndex(i); break; }
+            }
+        }
+
+        JScrollPane scroll = new JScrollPane(list);
+        scroll.setPreferredSize(new Dimension(220, 220));
+
+        int result = JOptionPane.showConfirmDialog(
+                this, scroll, "Select Appointment Type",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION && list.getSelectedIndex() >= 0) {
+            selectedType = types[list.getSelectedIndex()];
+            typeButton.setText(typeNames[list.getSelectedIndex()]);
+            typeButton.setForeground(new Color(20, 120, 50));
+        }
     }
 
     public void loadAvailableSlots() {
@@ -132,10 +180,15 @@ public class AppointmentPanel extends JPanel {
         statusLabel.setText(" ");
     }
 
-    private void handleBooking(AppointmentType selectedType) {
+    private void handleBooking() {
         int selectedIndex = slotList.getSelectedIndex();
         if (selectedIndex < 0 || availableSlots == null || availableSlots.isEmpty()) {
             setStatus("Please select a time slot.", false);
+            return;
+        }
+
+        if (selectedType == null) {
+            setStatus("Please choose an appointment type.", false);
             return;
         }
 
@@ -144,14 +197,20 @@ public class AppointmentPanel extends JPanel {
         User currentUser = authService.getCurrentUser();
 
         Appointment appointment = createAppointment(0, currentUser, selectedSlot,
-                selectedType, AppointmentStatus.PENDING, participants);
+                selectedType, AppointmentStatus.CONFIRMED, participants);
 
         try {
+            System.out.println("Processing booking for " + selectedType + "...");
             appointmentService.bookAppointment(appointment);
             setStatus("Appointment booked successfully!", true);
+            // Reset type selection after a successful booking
+            selectedType = null;
+            typeButton.setText("Choose Type...");
+            typeButton.setForeground(new Color(25, 80, 170));
             loadAvailableSlots();
-        } catch (IllegalArgumentException ex) {
-            setStatus(ex.getMessage(), false);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            setStatus("Error: " + ex.getMessage(), false);
         }
     }
 
@@ -166,8 +225,6 @@ public class AppointmentPanel extends JPanel {
             case IN_PERSON  -> new InPersonAppointment(id, user, slot, status, participants);
             case INDIVIDUAL -> new IndividualAppointment(id, user, slot, status, participants);
             case GROUP      -> new GroupAppointment(id, user, slot, status, participants);
-            case DEFAULT    -> new DefaultAppointment(id, user, slot, status, participants);
-            case CUSTOM     -> new CustomAppointment(id, user, slot, status, participants);
         };
     }
 

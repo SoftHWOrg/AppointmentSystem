@@ -2,13 +2,10 @@ package org.example.presentation;
 
 import org.example.service.AuthService;
 import org.example.service.ScheduleService;
-import org.example.domain.valueobject.TimeSlot;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 public class DashboardPanel extends JPanel {
 
@@ -17,8 +14,9 @@ public class DashboardPanel extends JPanel {
     private final ScheduleService scheduleService;
 
     private JLabel welcomeLabel;
-    private JButton myApptsButton;
     private JButton bookButton;
+    private JButton myApptsButton;
+    private JButton adminButton;
 
     public DashboardPanel(MainFrame mainFrame, AuthService authService, ScheduleService scheduleService) {
         this.mainFrame = mainFrame;
@@ -27,51 +25,31 @@ public class DashboardPanel extends JPanel {
         buildUI();
     }
 
-    private void handleCreateSlot() {
-        try {
-            String dateStr = JOptionPane.showInputDialog(this, "Enter Date (YYYY-MM-DD):", LocalDate.now().toString());
-            if (dateStr == null) return;
-            String startStr = JOptionPane.showInputDialog(this, "Enter Start Time (HH:MM):", "09:00");
-            if (startStr == null) return;
-            String endStr = JOptionPane.showInputDialog(this, "Enter End Time (HH:MM):", "10:00");
-            if (endStr == null) return;
-
-            LocalDate date = LocalDate.parse(dateStr);
-            LocalTime start = LocalTime.parse(startStr);
-            LocalTime end = LocalTime.parse(endStr);
-
-            TimeSlot slot = new TimeSlot(0, date, start, end, true);
-            scheduleService.addSlot(slot);
-            JOptionPane.showMessageDialog(this, "New slot created successfully!");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void buildUI() {
         setLayout(new BorderLayout());
         setBackground(new Color(240, 244, 248));
 
         welcomeLabel = new JLabel("Welcome!", SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
         welcomeLabel.setForeground(new Color(25, 80, 170));
-        welcomeLabel.setBorder(new EmptyBorder(30, 0, 10, 0));
+        welcomeLabel.setBorder(new EmptyBorder(40, 0, 20, 0));
         add(welcomeLabel, BorderLayout.NORTH);
 
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
         btnPanel.setBackground(new Color(240, 244, 248));
 
+        bookButton = new JButton("Book an Appointment");
+        styleButton(bookButton, new Color(25, 140, 60));
+        bookButton.addActionListener(e -> mainFrame.showPanel(MainFrame.APPOINTMENT_PANEL));
+
         myApptsButton = new JButton("My Appointments");
         styleButton(myApptsButton, new Color(25, 100, 200));
         myApptsButton.addActionListener(e -> mainFrame.showPanel(MainFrame.MY_APPTS_PANEL));
 
-        bookButton = new JButton("Book an Appointment");
-        styleButton(bookButton, new Color(25, 140, 60));
-        bookButton.addActionListener(e -> {
-            mainFrame.getCustomAppointmentPanel().clearFields();
-            mainFrame.showPanel(MainFrame.CUSTOM_APPOINTMENT_PANEL);
-        });
+        adminButton = new JButton("Admin Panel");
+        styleButton(adminButton, new Color(100, 40, 160));
+        adminButton.addActionListener(e -> mainFrame.showPanel(MainFrame.ADMIN_PANEL));
 
         JButton logoutButton = new JButton("Logout");
         styleButton(logoutButton, new Color(160, 40, 40));
@@ -80,22 +58,12 @@ public class DashboardPanel extends JPanel {
             mainFrame.showPanel(MainFrame.LOGIN_PANEL);
         });
 
-        myApptsButton.setVisible(false);
-        bookButton.setVisible(false);
-
-        btnPanel.add(myApptsButton);
-        btnPanel.add(Box.createRigidArea(new Dimension(0, 14)));
-        
-        if (authService.isAdmin()) {
-            JButton createSlotButton = new JButton("Create New Slot");
-            styleButton(createSlotButton, new Color(130, 80, 200));
-            createSlotButton.addActionListener(e -> handleCreateSlot());
-            btnPanel.add(createSlotButton);
-            btnPanel.add(Box.createRigidArea(new Dimension(0, 14)));
-        }
-
         btnPanel.add(bookButton);
-        btnPanel.add(Box.createRigidArea(new Dimension(0, 14)));
+        btnPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        btnPanel.add(myApptsButton);
+        btnPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        btnPanel.add(adminButton);
+        btnPanel.add(Box.createRigidArea(new Dimension(0, 15)));
         btnPanel.add(logoutButton);
 
         JPanel wrapper = new JPanel(new GridBagLayout());
@@ -110,9 +78,9 @@ public class DashboardPanel extends JPanel {
         welcomeLabel.setText("Welcome, " + authService.getCurrentUser().getName() + "!");
 
         boolean isAdmin = authService.isAdmin();
-        myApptsButton.setVisible(true);
-        myApptsButton.setText(isAdmin ? "Manage All Appointments" : "My Appointments");
         bookButton.setVisible(!isAdmin);
+        myApptsButton.setVisible(true); // Users see their appts, Admins see theirs (usually empty)
+        adminButton.setVisible(isAdmin);
 
         revalidate();
         repaint();
@@ -126,8 +94,8 @@ public class DashboardPanel extends JPanel {
         button.setBorderPainted(false);
         button.setOpaque(true);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setMaximumSize(new Dimension(260, 42));
-        button.setPreferredSize(new Dimension(260, 42));
+        button.setMaximumSize(new Dimension(280, 45));
+        button.setPreferredSize(new Dimension(280, 45));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 }

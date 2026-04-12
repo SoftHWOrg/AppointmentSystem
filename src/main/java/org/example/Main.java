@@ -12,6 +12,7 @@ import org.example.service.AppointmentService;
 import org.example.service.AuthService;
 import org.example.service.ReminderService;
 import org.example.service.ScheduleService;
+import org.example.strategy.AppointmentTypeRuleStrategy;
 import org.example.strategy.BookingRuleStrategy;
 import org.example.strategy.DurationRuleStrategy;
 import org.example.strategy.ParticipantLimitRuleStrategy;
@@ -24,13 +25,14 @@ public class Main {
 
     public static void main(String[] args) {
 
-        TxtUserRepository userRepo        = new TxtUserRepository();
+        TxtUserRepository userRepo = new TxtUserRepository();
         TxtAppointmentRepository apptRepo = new TxtAppointmentRepository();
-        TxtTimeSlotRepository slotRepo    = new TxtTimeSlotRepository();
+        TxtTimeSlotRepository slotRepo = new TxtTimeSlotRepository();
 
         List<BookingRuleStrategy> rules = Arrays.asList(
                 new DurationRuleStrategy(),
-                new ParticipantLimitRuleStrategy()
+                new ParticipantLimitRuleStrategy(),
+                new AppointmentTypeRuleStrategy()
         );
 
         ReminderService reminderService = new ReminderService();
@@ -38,11 +40,11 @@ public class Main {
         reminderService.registerObserver(new SMSNotificationObserver());
         reminderService.registerObserver(new CalendarNotificationObserver());
 
-        AuthService authService         = new AuthService(userRepo);
+        AuthService authService = new AuthService(userRepo);
         ScheduleService scheduleService = new ScheduleService(new Schedule(), slotRepo);
-        AppointmentService apptService  = new AppointmentService(apptRepo, scheduleService, reminderService, rules);
+        AppointmentService apptService = new AppointmentService(apptRepo, scheduleService, reminderService, rules);
 
         SwingUtilities.invokeLater(() ->
-                new MainFrame(authService, apptService, scheduleService));
+                new MainFrame(authService, apptService, scheduleService, reminderService));
     }
 }

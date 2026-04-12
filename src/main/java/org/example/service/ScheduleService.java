@@ -30,6 +30,7 @@ public class ScheduleService {
         if (!slot.getEndTime().isAfter(slot.getStartTime())) {
             throw new IllegalArgumentException("End time must be after start time");
         }
+<<<<<<< HEAD
 
         // Prevent duplicates
         for (TimeSlot existing : schedule.getTimeSlots()) {
@@ -44,6 +45,8 @@ public class ScheduleService {
             }
         }
 
+=======
+>>>>>>> origin/ibrahimbranch
         slotRepository.save(slot); // assigns the real ID and writes to file
         schedule.addSlot(slot); // slot now has the correct ID from the repo
     }
@@ -53,6 +56,7 @@ public class ScheduleService {
         updateSlotInFile(slotId);
     }
 
+<<<<<<< HEAD
     public void freeSlot(TimeSlot slot) {
         if (slot == null)
             return;
@@ -72,6 +76,11 @@ public class ScheduleService {
             slot.setAvailable(true);
             addSlot(slot);
         }
+=======
+    public void freeSlot(int slotId) {
+        schedule.freeSlot(slotId);
+        updateSlotInFile(slotId);
+>>>>>>> origin/ibrahimbranch
     }
 
     private void updateSlotInFile(int slotId) {

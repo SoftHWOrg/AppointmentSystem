@@ -20,9 +20,6 @@ public enum AppointmentType {
     
     INDIVIDUAL,
 
-    GROUP,
-
-    DEFAULT,
     
-    CUSTOM
+    GROUP
 }

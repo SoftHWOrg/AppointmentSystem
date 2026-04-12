@@ -98,7 +98,13 @@ public class TxtAppointmentRepository implements AppointmentRepository {
         LocalTime slotEnd        = LocalTime.parse(p[9].trim());
         boolean slotAvailable    = Boolean.parseBoolean(p[10].trim());
 
-        AppointmentType type     = AppointmentType.valueOf(p[11].trim());
+        AppointmentType type;
+        try {
+            type = AppointmentType.valueOf(p[11].trim());
+        } catch (IllegalArgumentException e) {
+            type = AppointmentType.DEFAULT; 
+        }
+        
         AppointmentStatus status = AppointmentStatus.valueOf(p[12].trim());
         int participants         = Integer.parseInt(p[13].trim());
 

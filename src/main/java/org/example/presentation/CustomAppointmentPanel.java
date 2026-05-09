@@ -2,7 +2,6 @@ package org.example.presentation;
 
 import org.example.domain.appointment.DefaultAppointment;
 import org.example.domain.entity.Appointment;
-import org.example.domain.entity.User;
 import org.example.domain.enums.AppointmentStatus;
 import org.example.domain.valueobject.TimeSlot;
 import org.example.service.AppointmentService;

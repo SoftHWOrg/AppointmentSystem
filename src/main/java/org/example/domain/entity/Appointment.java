@@ -13,7 +13,7 @@ public abstract class Appointment {
     private AppointmentStatus status;
     private int participants;
 
-    public Appointment(int id, User user, TimeSlot timeSlot,
+    protected Appointment(int id, User user, TimeSlot timeSlot,
                        AppointmentType type, AppointmentStatus status, int participants) {
         this.id = id;
         this.user = user;

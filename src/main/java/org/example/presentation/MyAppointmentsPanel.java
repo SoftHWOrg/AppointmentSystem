@@ -16,19 +16,16 @@ public class MyAppointmentsPanel extends JPanel {
     private final MainFrame mainFrame;
     private final AuthService authService;
     private final AppointmentService appointmentService;
-    private final ScheduleService scheduleService;
     private JTable appointmentsTable;
     private DefaultTableModel tableModel;
     private JLabel statusLabel;
 
     public MyAppointmentsPanel(MainFrame mainFrame,
                                AuthService authService,
-                               AppointmentService appointmentService,
-                               ScheduleService scheduleService) {
+                               AppointmentService appointmentService) {
         this.mainFrame = mainFrame;
         this.authService = authService;
         this.appointmentService = appointmentService;
-        this.scheduleService = scheduleService;
         buildUI();
     }
 

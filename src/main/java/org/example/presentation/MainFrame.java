@@ -41,9 +41,9 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
 
         LoginPanel loginPanel = new LoginPanel(this, authService);
-        dashboardPanel = new DashboardPanel(this, authService, scheduleService);
+        dashboardPanel = new DashboardPanel(this, authService);
         appointmentPanel = new AppointmentPanel(this, authService, appointmentService, scheduleService);
-        myApptsPanel = new MyAppointmentsPanel(this, authService, appointmentService, scheduleService);
+        myApptsPanel = new MyAppointmentsPanel(this, authService, appointmentService);
         adminPanel = new AdminPanel(this, authService, appointmentService, scheduleService);
         editAppointmentPanel = new CustomAppointmentPanel(this, authService, appointmentService, scheduleService);
 

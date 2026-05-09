@@ -160,4 +160,48 @@ class AppointmentServiceTest {
         assertEquals(1, results.size());
         verify(appointmentRepo).findByUserId(1);
     }
+
+    @Test
+    @DisplayName("Modification: Should fail if appointment is null")
+    void testModifyAppointment_Null() {
+        assertThrows(IllegalArgumentException.class, () -> appointmentService.modifyAppointment(null));
+    }
+
+    @Test
+    @DisplayName("Modification: Should fail if appointment is in the past")
+    void testModifyAppointment_PastDate() {
+        TimeSlot pastSlot = new TimeSlot(11, LocalDate.now().minusDays(1), LocalTime.of(10, 0), LocalTime.of(11, 0), false);
+        Appointment pastAppt = new DefaultAppointment(1, regularUser, pastSlot, AppointmentStatus.CONFIRMED, 1);
+        
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> appointmentService.modifyAppointment(pastAppt));
+        assertEquals("Only future appointments can be modified.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Cancellation: Should fail if appointment is in the past")
+    void testCancelAppointment_PastDate() {
+        TimeSlot pastSlot = new TimeSlot(11, LocalDate.now().minusDays(1), LocalTime.of(10, 0), LocalTime.of(11, 0), false);
+        Appointment pastAppt = new DefaultAppointment(1, regularUser, pastSlot, AppointmentStatus.CONFIRMED, 1);
+        when(appointmentRepo.findById(1)).thenReturn(pastAppt);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> appointmentService.cancelAppointment(1, regularUser));
+        assertEquals("Only future appointments can be cancelled.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Cancellation: Should fail if appointment not found")
+    void testCancelAppointment_NotFound() {
+        when(appointmentRepo.findById(999)).thenReturn(null);
+        assertThrows(IllegalArgumentException.class, () -> appointmentService.cancelAppointment(999, regularUser));
+    }
+
+    @Test
+    @DisplayName("Booking: Should handle null rules")
+    void testBookAppointment_NullRules() {
+        AppointmentService serviceNoRules = new AppointmentService(appointmentRepo, scheduleService, reminderService, null);
+        Appointment appt = new DefaultAppointment(1, regularUser, testSlot, AppointmentStatus.PENDING, 1);
+        
+        serviceNoRules.bookAppointment(appt);
+        verify(appointmentRepo).save(appt);
+    }
 }

@@ -11,17 +11,15 @@ public class DashboardPanel extends JPanel {
 
     private final MainFrame mainFrame;
     private final AuthService authService;
-    private final ScheduleService scheduleService;
 
     private JLabel welcomeLabel;
     private JButton bookButton;
     private JButton myApptsButton;
     private JButton adminButton;
 
-    public DashboardPanel(MainFrame mainFrame, AuthService authService, ScheduleService scheduleService) {
+    public DashboardPanel(MainFrame mainFrame, AuthService authService) {
         this.mainFrame = mainFrame;
         this.authService = authService;
-        this.scheduleService = scheduleService;
         buildUI();
     }
 

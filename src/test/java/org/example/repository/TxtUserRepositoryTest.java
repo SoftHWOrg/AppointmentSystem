@@ -58,4 +58,26 @@ class TxtUserRepositoryTest {
         User updated = repository.findById(user.getId());
         assertEquals("New Name", updated.getName());
     }
+    @Test
+    void testFindByEmail_NotFound() {
+        User found = repository.findByEmail("nonexistent@e.com");
+        assertNull(found);
+    }
+
+    @Test
+    void testFindById_NotFound() {
+        User found = repository.findById(999);
+        assertNull(found);
+    }
+
+    @Test
+    void testParseMalformedLine() throws IOException {
+        Path testFile = tempDir.resolve("users_malformed.txt");
+        Files.writeString(testFile, "invalid_line\n\n1|Name|email|pass|USER");
+        TxtUserRepository malformedRepo = new TxtUserRepository(testFile.toString());
+        
+        User found = malformedRepo.findById(1);
+        assertNotNull(found);
+        assertEquals("Name", found.getName());
+    }
 }

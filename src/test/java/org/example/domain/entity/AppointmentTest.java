@@ -34,4 +34,19 @@ class AppointmentTest {
         assertEquals(5, appt.getParticipants());
         assertEquals(AppointmentType.URGENT, appt.getType());
     }
+
+    @Test
+    void testToString() {
+        User user = new User(1, "John", "j@e.com", "p", "USER");
+        Appointment appt = new DefaultAppointment(1, user, null, AppointmentStatus.CONFIRMED, 1);
+        String expected = "Appointment{id=1, type=DEFAULT, status=CONFIRMED, user=John}";
+        assertEquals(expected, appt.toString());
+    }
+
+    @Test
+    void testToString_NullUser() {
+        Appointment appt = new DefaultAppointment(1, null, null, AppointmentStatus.CONFIRMED, 1);
+        String expected = "Appointment{id=1, type=DEFAULT, status=CONFIRMED, user=null}";
+        assertEquals(expected, appt.toString());
+    }
 }

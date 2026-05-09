@@ -79,14 +79,12 @@ class TxtTimeSlotRepositoryTest {
         new TxtTimeSlotRepository(deepPath);
         assertTrue(Files.exists(path));
         
-        // Cleanup
         Files.delete(path);
         Files.delete(path.getParent());
     }
 
     @Test
     void testParseLine_InvalidData() {
-        // Accessing private parseLine via findAll indirectly with bad data
         try {
             Files.write(Paths.get(TEST_FILE), List.of("invalid|data|line"), java.nio.charset.StandardCharsets.UTF_8);
         } catch (IOException e) {

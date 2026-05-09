@@ -24,7 +24,6 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-    
 
         TxtUserRepository userRepo = new TxtUserRepository();
         TxtAppointmentRepository apptRepo = new TxtAppointmentRepository();
@@ -33,8 +32,7 @@ public class Main {
         List<BookingRuleStrategy> rules = Arrays.asList(
                 new DurationRuleStrategy(),
                 new ParticipantLimitRuleStrategy(),
-                new AppointmentTypeRuleStrategy()
-        );
+                new AppointmentTypeRuleStrategy());
 
         ReminderService reminderService = new ReminderService();
         reminderService.registerObserver(new EmailNotificationObserver());
@@ -45,7 +43,6 @@ public class Main {
         ScheduleService scheduleService = new ScheduleService(new Schedule(), slotRepo);
         AppointmentService apptService = new AppointmentService(apptRepo, scheduleService, reminderService, rules);
 
-        SwingUtilities.invokeLater(() ->
-                new MainFrame(authService, apptService, scheduleService, reminderService));
+        SwingUtilities.invokeLater(() -> new MainFrame(authService, apptService, scheduleService, reminderService));
     }
 }

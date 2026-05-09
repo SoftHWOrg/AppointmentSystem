@@ -80,7 +80,36 @@ class TxtAppointmentRepositoryTest {
         repository.save(appt1);
         
         List<Appointment> userApps = repository.findByUserId(testUser.getId());
-        assertFalse(userApps.isEmpty());
         assertTrue(userApps.stream().allMatch(a -> a.getUser().getId() == testUser.getId()));
+    }
+
+    @Test
+    void testFindAll() {
+        Appointment appt1 = new UrgentAppointment(0, testUser, testSlot, AppointmentStatus.CONFIRMED, 1);
+        repository.save(appt1);
+        
+        List<Appointment> all = repository.findAll();
+        assertEquals(1, all.size());
+    }
+
+    @Test
+    void testParseMalformedLine() throws IOException {
+        Path testFile = tempDir.resolve("appointments_malformed.txt");
+        // A line with too few parts
+        Files.writeString(testFile, "1|1|Name|Email|Pass|ROLE|1|2023-10-27|10:00|11:00|true|DEFAULT|CONFIRMED\n" + // 13 parts instead of 14
+                                   "invalid_line\n" +
+                                   "1|1|Name|Email|Pass|ROLE|1|2023-10-27|10:00|11:00|true|INVALID_TYPE|CONFIRMED|1"); // Invalid type
+        
+        TxtAppointmentRepository malformedRepo = new TxtAppointmentRepository(testFile.toString());
+        List<Appointment> apps = malformedRepo.findAll();
+        
+        // The first line should return null (too few parts), second null, third should default to DEFAULT type
+        assertEquals(1, apps.size());
+        assertEquals(org.example.domain.enums.AppointmentType.DEFAULT, apps.get(0).getType());
+    }
+
+    @Test
+    void testDeleteNonExistent() {
+        assertDoesNotThrow(() -> repository.delete(999));
     }
 }

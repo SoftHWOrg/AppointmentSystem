@@ -135,6 +135,19 @@ class ScheduleServiceTest {
         assertTrue(slot.isAvailable());
         verify(slotRepo).update(slot);
     }
+
+    @Test
+    @DisplayName("Sync: Should synchronize internal schedule with repository data")
+    void testSyncWithRepository() {
+        TimeSlot newRepoSlot = new TimeSlot(200, LocalDate.now(), LocalTime.of(16, 0), LocalTime.of(17, 0), true);
+        when(slotRepo.findAll()).thenReturn(java.util.Collections.singletonList(newRepoSlot));
+        
+        // This will call syncWithRepository via getAvailableSlots
+        List<TimeSlot> slots = scheduleService.getAvailableSlots();
+        
+        assertTrue(slots.stream().anyMatch(s -> s.getId() == 200));
+        assertTrue(schedule.getTimeSlots().stream().anyMatch(s -> s.getId() == 200));
+    }
 }
 
 

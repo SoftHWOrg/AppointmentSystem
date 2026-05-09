@@ -36,4 +36,16 @@ class AppointmentTypeRuleStrategyTest {
     void testIsValid_nullAppointment_returnsFalse() {
         assertFalse(strategy.isValid(null));
     }
+
+    @Test
+    void testIsValid_nullType_returnsFalse() {
+        Appointment mockAppt = org.mockito.Mockito.mock(Appointment.class);
+        org.mockito.Mockito.when(mockAppt.getType()).thenReturn(null);
+        assertFalse(strategy.isValid(mockAppt));
+    }
+
+    @Test
+    void testGetErrorMessage() {
+        assertEquals("An appointment type must be selected.", strategy.getErrorMessage());
+    }
 }

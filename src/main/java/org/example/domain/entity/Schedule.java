@@ -19,7 +19,7 @@ public class Schedule {
     public List<TimeSlot> getAvailableSlots() {
         return timeSlots.stream()
                 .filter(TimeSlot::isAvailable)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     

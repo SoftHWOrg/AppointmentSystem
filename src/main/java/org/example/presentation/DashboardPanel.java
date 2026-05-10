@@ -1,7 +1,6 @@
 package org.example.presentation;
 
 import org.example.service.AuthService;
-import org.example.service.ScheduleService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

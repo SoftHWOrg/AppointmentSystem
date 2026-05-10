@@ -3,7 +3,6 @@ package org.example.presentation;
 import org.example.domain.entity.Appointment;
 import org.example.service.AppointmentService;
 import org.example.service.AuthService;
-import org.example.service.ScheduleService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
